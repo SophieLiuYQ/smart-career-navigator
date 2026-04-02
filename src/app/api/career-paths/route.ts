@@ -143,7 +143,7 @@ Bridge roles found: ${skillResult.bridgeRoles.map((b) => `${b.title} (shares: ${
   } catch (error) {
     console.error("Failed to find career paths:", error);
     return NextResponse.json(
-      { error: "Failed to find career paths" },
+      { error: "Failed to find career paths", detail: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
