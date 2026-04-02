@@ -184,7 +184,8 @@ export default function Home() {
     const fetchPaths = async () => {
       setPathsLoading(true);
       try {
-        const res = await fetch("/api/career-paths", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentRole, targetRole }) });
+        const userSkills = resumeData?.skills || [];
+        const res = await fetch("/api/career-paths", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentRole, targetRole, userSkills }) });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         setPathsData(data);
