@@ -5,6 +5,7 @@ import CareerPathsView from "@/components/CareerPathsView";
 import LearningPlanView from "@/components/LearningPlanView";
 import ConnectionsView from "@/components/ConnectionsView";
 import GraphVisualization from "@/components/GraphVisualization";
+import RoleCombobox from "@/components/RoleCombobox";
 import type {
   Role,
   CareerPathsResponse,
@@ -313,18 +314,22 @@ export default function Home() {
             <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center mb-5">
               <div>
                 <div className="text-[10px] text-gray-600 uppercase tracking-widest font-medium mb-1.5">Current Role</div>
-                <select value={currentRole} onChange={(e) => setCurrentRole(e.target.value)} className="role-select">
-                  <option value="">-- Select or auto-detect --</option>
-                  {roles.map((r) => <option key={r.title} value={r.title}>{r.title}</option>)}
-                </select>
+                <RoleCombobox
+                  value={currentRole}
+                  onChange={setCurrentRole}
+                  options={roles.map((r) => r.title)}
+                  placeholder="Type or select your role..."
+                />
               </div>
               <div className="text-gray-600 text-lg pt-4">→</div>
               <div>
                 <div className="text-[10px] text-gray-600 uppercase tracking-widest font-medium mb-1.5">Dream Role</div>
-                <select value={targetRole} onChange={(e) => setTargetRole(e.target.value)} className="role-select">
-                  <option value="">-- Your destination --</option>
-                  {roles.map((r) => <option key={r.title} value={r.title}>{r.title}</option>)}
-                </select>
+                <RoleCombobox
+                  value={targetRole}
+                  onChange={setTargetRole}
+                  options={roles.map((r) => r.title)}
+                  placeholder="Type your dream role..."
+                />
               </div>
             </div>
 
