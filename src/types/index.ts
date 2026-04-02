@@ -25,6 +25,7 @@ export interface CareerPathsResponse {
   market_insight?: string;
   rawPaths: CareerPath[];
   _source?: string;
+  _pathSource?: "graph" | "ai" | "hybrid";
   _roleMapping?: {
     current: { input: string; resolved: string; exact: boolean; created?: boolean };
     target: { input: string; resolved: string; exact: boolean; created?: boolean };

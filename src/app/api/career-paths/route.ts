@@ -21,6 +21,28 @@ function parseJson(raw: string) {
   return JSON.parse(match ? match[0] : cleaned);
 }
 
+async function generateAIPaths(currentRole: string, targetRole: string): Promise<CareerPath[]> {
+  const response = await generateCompletion(
+    `You are a career path expert. Generate 3 realistic career transition paths between two roles.
+Each path should have sensible intermediate steps that a real professional would take.
+Respond ONLY with valid JSON, no markdown:
+{
+  "paths": [
+    { "role_names": ["Start Role", "Step 1", "Step 2", "Target Role"], "total_months": number, "path_probability": 0.0-1.0 }
+  ]
+}`,
+    `From: "${currentRole}" To: "${targetRole}". Generate 3 realistic paths with intermediate roles.`,
+    2048
+  );
+
+  try {
+    const parsed = parseJson(response);
+    return parsed.paths || [];
+  } catch {
+    return [];
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { currentRole, targetRole } = await request.json();
@@ -42,7 +64,7 @@ export async function POST(request: Request) {
     const graphTargetRole = targetResolved.resolved;
 
     // Neo4j: Graph pathfinding
-    const rawPaths = await runQuery<CareerPath>(
+    let rawPaths = await runQuery<CareerPath>(
       `MATCH path = allShortestPaths(
         (current:Role {title: $currentRole})-[:LEADS_TO*..6]->(target:Role {title: $targetRole})
       )
@@ -56,11 +78,33 @@ export async function POST(request: Request) {
       { currentRole: graphCurrentRole, targetRole: graphTargetRole }
     );
 
+    let pathSource: "graph" | "ai" | "hybrid" = "graph";
+
+    // If no graph paths found, generate with AI
+    if (rawPaths.length === 0) {
+      console.log("[career-paths] No graph paths found, generating with AI");
+      rawPaths = await generateAIPaths(currentRole, targetRole);
+      pathSource = "ai";
+    } else {
+      // Validate graph paths — check if they make sense (not too many hops through unrelated roles)
+      const suspicious = rawPaths.every(
+        (p) => p.role_names.length > 4 || p.path_probability < 0.001
+      );
+      if (suspicious) {
+        console.log("[career-paths] Graph paths look suspicious, supplementing with AI");
+        const aiPaths = await generateAIPaths(currentRole, targetRole);
+        // Combine: AI paths first (likely more sensible), then graph paths
+        rawPaths = [...aiPaths, ...rawPaths].slice(0, 5);
+        pathSource = "hybrid";
+      }
+    }
+
     if (rawPaths.length === 0) {
       return NextResponse.json({
         rawPaths: [],
         paths: [],
-        overall_advice: "No career paths found between these roles. Try selecting roles that are more closely related.",
+        overall_advice: `No career paths could be determined from ${currentRole} to ${targetRole}. These roles may be in very different industries.`,
+        _source: "anthropic",
       });
     }
 
@@ -82,6 +126,7 @@ export async function POST(request: Request) {
       currentRole,
       targetRole,
       skillGaps,
+      pathSource,
     };
 
     let aiAnalysis;
@@ -105,14 +150,14 @@ export async function POST(request: Request) {
       } catch {
         aiAnalysis = {
           paths: rawPaths.map((p, i) => ({ roles: p.role_names, assessment: "AI analysis.", recommended: i === 0 })),
-          overall_advice: typeof rocketResult.data === "string" ? rocketResult.data : "Analysis complete.",
+          overall_advice: "Analysis complete.",
         };
       }
     } else {
       // Fallback: Direct Anthropic call
       console.log("[career-paths] ⚠️ RocketRide unavailable, falling back to Anthropic");
       const systemPrompt = `You are a career advisor AI. You analyze career transition paths and provide personalized recommendations.
-Given career paths from a graph database, analyze each path and provide:
+Given career paths, analyze each path and provide:
 1. A brief assessment of each path (1-2 sentences)
 2. Which path you recommend and why
 3. Key risks and considerations
@@ -122,7 +167,9 @@ Respond ONLY with valid JSON, no markdown: { "paths": [{ "roles": [...], "assess
 
 Paths: ${JSON.stringify(rawPaths)}
 
-Key skill gaps to bridge: ${JSON.stringify(skillGaps)}`;
+Key skill gaps to bridge: ${JSON.stringify(skillGaps)}
+
+Path source: ${pathSource} (graph = from Neo4j database, ai = AI-generated, hybrid = both)`;
 
       const aiResponseRaw = await generateCompletion(systemPrompt, userMessage);
 
@@ -132,7 +179,7 @@ Key skill gaps to bridge: ${JSON.stringify(skillGaps)}`;
         aiAnalysis = {
           paths: rawPaths.map((p, i) => ({
             roles: p.role_names,
-            assessment: i === 0 ? "Most probable path based on industry data." : "Alternative path worth considering.",
+            assessment: i === 0 ? "Most probable path." : "Alternative path.",
             recommended: i === 0,
           })),
           overall_advice: aiResponseRaw,
@@ -144,6 +191,7 @@ Key skill gaps to bridge: ${JSON.stringify(skillGaps)}`;
       rawPaths,
       ...aiAnalysis,
       _source: aiSource,
+      _pathSource: pathSource,
       _roleMapping: {
         current: { input: currentRole, resolved: graphCurrentRole, exact: currentResolved.exact, created: currentResolved.created },
         target: { input: targetRole, resolved: graphTargetRole, exact: targetResolved.exact, created: targetResolved.created },
