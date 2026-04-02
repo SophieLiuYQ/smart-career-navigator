@@ -26,11 +26,12 @@ export async function runQuery<T>(
   try {
     const result = await session.run(cypher, params);
     return result.records.map((record) => {
-      const obj = record.toObject();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const obj: any = record.toObject();
       // Convert Neo4j Integer types to JS numbers
       for (const key of Object.keys(obj)) {
         if (neo4j.isInt(obj[key])) {
-          obj[key] = (obj[key] as neo4j.Integer).toNumber();
+          obj[key] = obj[key].toNumber();
         }
       }
       return obj as T;
