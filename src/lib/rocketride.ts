@@ -50,12 +50,7 @@ export async function triggerPipeline(
   return result;
 }
 
-export async function analyzeCareerPaths(payload: {
-  paths: Array<{ role_names: string[]; total_months: number; path_probability: number }>;
-  currentRole: string;
-  targetRole: string;
-  skillGaps: Array<{ skill: string; importance: number }>;
-}) {
+export async function analyzeCareerPaths(payload: Record<string, unknown>) {
   return triggerPipeline("/career-analyze", payload);
 }
 
