@@ -15,6 +15,7 @@ export async function triggerPipeline(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15000), // 15s timeout
     });
 
     if (!response.ok) {
@@ -24,7 +25,7 @@ export async function triggerPipeline(
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error(`RocketRide pipeline ${pipelinePath} failed:`, error);
+    console.error(`[RocketRide] Pipeline ${pipelinePath} failed:`, error instanceof Error ? error.message : error);
     return {
       success: false,
       data: null,
@@ -60,4 +61,12 @@ export async function recommendConnections(payload: {
   targetRole: string;
 }) {
   return triggerPipeline("/connections", payload);
+}
+
+export async function analyzeOnetData(payload: {
+  role: string;
+  htmlContent: string;
+  userSkills: string[];
+}) {
+  return triggerPipeline("/onet-analyze", payload);
 }

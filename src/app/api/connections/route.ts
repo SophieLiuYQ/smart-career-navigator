@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { generateCompletion } from "@/lib/anthropic";
+import { recommendConnections } from "@/lib/rocketride";
 
 interface TransitionPerson {
   name: string;
@@ -16,6 +17,12 @@ interface IntermediatePerson {
   years_exp: number;
 }
 
+function parseJson(raw: string) {
+  const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  return JSON.parse(match ? match[0] : cleaned);
+}
+
 export async function POST(request: Request) {
   try {
     const { currentRole, targetRole } = await request.json();
@@ -27,6 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Neo4j: Find people who made this transition + intermediate contacts
     const [transitionMakers, intermediatePeople] = await Promise.all([
       runQuery<TransitionPerson>(
         `MATCH (p:Person)-[:PREVIOUSLY_HELD]->(source:Role {title: $currentRole}),
@@ -51,11 +59,34 @@ export async function POST(request: Request) {
       ),
     ]);
 
-    const systemPrompt = `You are a networking advisor. Given a list of connections who made career transitions relevant to the user's goal, suggest personalized outreach strategies.
+    // RocketRide AI Pipeline: Generate outreach recommendations
+    const pipelinePayload = {
+      transitionMakers,
+      intermediateContacts: intermediatePeople,
+      currentRole,
+      targetRole,
+    };
+
+    let outreach;
+    const rocketResult = await recommendConnections(pipelinePayload);
+
+    if (rocketResult.success && rocketResult.data) {
+      console.log("[connections] Using RocketRide pipeline result");
+      try {
+        outreach = typeof rocketResult.data === "string"
+          ? parseJson(rocketResult.data)
+          : rocketResult.data;
+      } catch {
+        outreach = rocketResult.data;
+      }
+    } else {
+      // Fallback: Direct Anthropic call
+      console.log("[connections] RocketRide unavailable, falling back to direct Anthropic");
+      const systemPrompt = `You are a networking advisor. Given a list of connections who made career transitions relevant to the user's goal, suggest personalized outreach strategies.
 For each person, suggest a brief message or talking point that would make a meaningful connection.
 Respond ONLY with valid JSON, no markdown: { "connections": [{ "name": "...", "company": "...", "role": "...", "reason": "...", "outreach_tip": "..." }], "networking_strategy": "..." }`;
 
-    const userMessage = `The user wants to transition from ${currentRole} to ${targetRole}.
+      const userMessage = `The user wants to transition from ${currentRole} to ${targetRole}.
 
 People who completed this transition: ${JSON.stringify(transitionMakers)}
 
@@ -63,14 +94,13 @@ People in intermediate roles on the path: ${JSON.stringify(intermediatePeople)}
 
 Suggest outreach strategies for each person.`;
 
-    const aiSuggestionsRaw = await generateCompletion(systemPrompt, userMessage);
+      const aiSuggestionsRaw = await generateCompletion(systemPrompt, userMessage);
 
-    let outreach;
-    try {
-      const cleaned = aiSuggestionsRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      outreach = JSON.parse(cleaned);
-    } catch {
-      outreach = { connections: [], networking_strategy: aiSuggestionsRaw };
+      try {
+        outreach = parseJson(aiSuggestionsRaw);
+      } catch {
+        outreach = { connections: [], networking_strategy: aiSuggestionsRaw };
+      }
     }
 
     return NextResponse.json({

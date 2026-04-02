@@ -1,0 +1,47 @@
+{
+  "name": "O*NET Role Analyzer",
+  "description": "Extracts structured job insights from O*NET occupation data and compares against user skills",
+  "nodes": [
+    {
+      "id": "webhook_input",
+      "type": "source/webhook",
+      "config": {
+        "path": "/onet-analyze",
+        "method": "POST"
+      },
+      "position": { "x": 0, "y": 200 }
+    },
+    {
+      "id": "extract_data",
+      "type": "transform/json-extract",
+      "config": {
+        "fields": ["role", "htmlContent", "userSkills"]
+      },
+      "position": { "x": 200, "y": 200 }
+    },
+    {
+      "id": "analyze_onet",
+      "type": "llm/anthropic",
+      "config": {
+        "model": "claude-sonnet-4-20250514",
+        "system_prompt": "You are a career data analyst. Extract structured job information from O*NET occupation page HTML. Compare required skills against the user's current skills to identify gaps.\n\nRespond in JSON format:\n{\n  \"title\": \"Official O*NET job title\",\n  \"description\": \"2-3 sentence job description\",\n  \"salary\": { \"median\": \"$XXX,XXX\", \"range\": \"$XX,XXX - $XXX,XXX\" },\n  \"outlook\": { \"growth\": \"X%\", \"description\": \"e.g. Much faster than average\", \"bright\": true/false },\n  \"top_skills\": [{ \"name\": \"Skill Name\", \"importance\": 1-100, \"have\": true/false }],\n  \"key_tasks\": [\"Task 1\", \"Task 2\"],\n  \"education\": \"Typical education requirement\",\n  \"related_roles\": [\"Role 1\", \"Role 2\"],\n  \"hot_technologies\": [\"Tech 1\", \"Tech 2\"],\n  \"knowledge_areas\": [\"Area 1\", \"Area 2\"]\n}",
+        "temperature": 0.2,
+        "max_tokens": 2048
+      },
+      "position": { "x": 400, "y": 200 }
+    },
+    {
+      "id": "output",
+      "type": "output/webhook-response",
+      "config": {
+        "content_type": "application/json"
+      },
+      "position": { "x": 600, "y": 200 }
+    }
+  ],
+  "edges": [
+    { "from": "webhook_input", "to": "extract_data", "output": "default", "input": "default" },
+    { "from": "extract_data", "to": "analyze_onet", "output": "default", "input": "default" },
+    { "from": "analyze_onet", "to": "output", "output": "default", "input": "default" }
+  ]
+}

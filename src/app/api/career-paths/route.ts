@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { generateCompletion } from "@/lib/anthropic";
+import { analyzeCareerPaths } from "@/lib/rocketride";
 
 interface CareerPath {
   role_names: string[];
@@ -11,6 +12,12 @@ interface CareerPath {
 interface SkillGapResult {
   skill: string;
   importance: number;
+}
+
+function parseJson(raw: string) {
+  const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  return JSON.parse(match ? match[0] : cleaned);
 }
 
 export async function POST(request: Request) {
@@ -24,6 +31,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Neo4j: Graph pathfinding
     const rawPaths = await runQuery<CareerPath>(
       `MATCH path = allShortestPaths(
         (current:Role {title: $currentRole})-[:LEADS_TO*..6]->(target:Role {title: $targetRole})
@@ -46,6 +54,7 @@ export async function POST(request: Request) {
       });
     }
 
+    // Neo4j: Skill gap query
     const skillGaps = await runQuery<SkillGapResult>(
       `MATCH (target:Role {title: $targetRole})-[req:REQUIRES_SKILL]->(s:Skill)
        WHERE NOT EXISTS {
@@ -57,34 +66,57 @@ export async function POST(request: Request) {
       { currentRole, targetRole }
     );
 
-    const systemPrompt = `You are a career advisor AI. You analyze career transition paths and provide personalized recommendations.
+    // RocketRide AI Pipeline: Analyze career paths
+    const pipelinePayload = {
+      paths: rawPaths,
+      currentRole,
+      targetRole,
+      skillGaps,
+    };
+
+    let aiAnalysis;
+    const rocketResult = await analyzeCareerPaths(pipelinePayload);
+
+    if (rocketResult.success && rocketResult.data) {
+      // RocketRide pipeline succeeded
+      console.log("[career-paths] Using RocketRide pipeline result");
+      try {
+        aiAnalysis = typeof rocketResult.data === "string"
+          ? parseJson(rocketResult.data)
+          : rocketResult.data;
+      } catch {
+        aiAnalysis = rocketResult.data;
+      }
+    } else {
+      // Fallback: Direct Anthropic call
+      console.log("[career-paths] RocketRide unavailable, falling back to direct Anthropic");
+      const systemPrompt = `You are a career advisor AI. You analyze career transition paths and provide personalized recommendations.
 Given career paths from a graph database, analyze each path and provide:
 1. A brief assessment of each path (1-2 sentences)
 2. Which path you recommend and why
 3. Key risks and considerations
 Respond ONLY with valid JSON, no markdown: { "paths": [{ "roles": [...], "assessment": "...", "recommended": false }], "overall_advice": "..." }`;
 
-    const userMessage = `Analyze these career paths from ${currentRole} to ${targetRole}:
+      const userMessage = `Analyze these career paths from ${currentRole} to ${targetRole}:
 
 Paths: ${JSON.stringify(rawPaths)}
 
 Key skill gaps to bridge: ${JSON.stringify(skillGaps)}`;
 
-    const aiResponseRaw = await generateCompletion(systemPrompt, userMessage);
+      const aiResponseRaw = await generateCompletion(systemPrompt, userMessage);
 
-    let aiAnalysis;
-    try {
-      const cleaned = aiResponseRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      aiAnalysis = JSON.parse(cleaned);
-    } catch {
-      aiAnalysis = {
-        paths: rawPaths.map((p, i) => ({
-          roles: p.role_names,
-          assessment: i === 0 ? "Most probable path based on industry data." : "Alternative path worth considering.",
-          recommended: i === 0,
-        })),
-        overall_advice: aiResponseRaw,
-      };
+      try {
+        aiAnalysis = parseJson(aiResponseRaw);
+      } catch {
+        aiAnalysis = {
+          paths: rawPaths.map((p, i) => ({
+            roles: p.role_names,
+            assessment: i === 0 ? "Most probable path based on industry data." : "Alternative path worth considering.",
+            recommended: i === 0,
+          })),
+          overall_advice: aiResponseRaw,
+        };
+      }
     }
 
     return NextResponse.json({

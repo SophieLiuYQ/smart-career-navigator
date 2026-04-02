@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateCompletion } from "@/lib/anthropic";
+import { analyzeOnetData } from "@/lib/rocketride";
 
 async function fetchPage(url: string): Promise<string> {
   const res = await fetch(url, {
@@ -57,8 +58,23 @@ export async function POST(request: Request) {
     // Truncate HTML to fit in prompt (keep first 15k chars which has the key data)
     const truncated = summaryHtml.slice(0, 15000);
 
-    // Step 3: Use AI to extract structured data
-    const systemPrompt = `You are a career data analyst. Extract structured job information from this O*NET occupation page HTML.
+    // Step 3: RocketRide AI Pipeline to extract structured data
+    let parsed;
+    const rocketResult = await analyzeOnetData({ role, htmlContent: truncated, userSkills });
+
+    if (rocketResult.success && rocketResult.data) {
+      console.log("[onet-insights] Using RocketRide pipeline result");
+      try {
+        parsed = typeof rocketResult.data === "string"
+          ? JSON.parse(rocketResult.data.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim())
+          : rocketResult.data;
+      } catch {
+        parsed = rocketResult.data;
+      }
+    } else {
+      // Fallback: Direct Anthropic call
+      console.log("[onet-insights] RocketRide unavailable, falling back to direct Anthropic");
+      const systemPrompt = `You are a career data analyst. Extract structured job information from this O*NET occupation page HTML.
 The user has these skills: ${userSkills.join(", ") || "none provided"}.
 For each skill in top_skills, set "have" to true if it matches or is closely related to one of the user's skills.
 
@@ -77,15 +93,15 @@ Respond ONLY with valid JSON, no markdown:
   "knowledge_areas": ["Area 1", "Area 2", "Area 3"]
 }`;
 
-    const aiResponse = await generateCompletion(systemPrompt, truncated);
+      const aiResponse = await generateCompletion(systemPrompt, truncated);
 
-    let parsed;
-    try {
-      const cleaned = aiResponse.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      const match = cleaned.match(/\{[\s\S]*\}/);
-      parsed = JSON.parse(match ? match[0] : cleaned);
-    } catch {
-      parsed = { error: "Failed to parse O*NET data", raw: aiResponse };
+      try {
+        const cleaned = aiResponse.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        const match = cleaned.match(/\{[\s\S]*\}/);
+        parsed = JSON.parse(match ? match[0] : cleaned);
+      } catch {
+        parsed = { error: "Failed to parse O*NET data", raw: aiResponse };
+      }
     }
 
     return NextResponse.json(parsed);
