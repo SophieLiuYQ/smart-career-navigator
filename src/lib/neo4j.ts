@@ -25,7 +25,16 @@ export async function runQuery<T>(
   const session = d.session({ database: process.env.NEO4J_DATABASE || "neo4j" });
   try {
     const result = await session.run(cypher, params);
-    return result.records.map((record) => record.toObject() as T);
+    return result.records.map((record) => {
+      const obj = record.toObject();
+      // Convert Neo4j Integer types to JS numbers
+      for (const key of Object.keys(obj)) {
+        if (neo4j.isInt(obj[key])) {
+          obj[key] = (obj[key] as neo4j.Integer).toNumber();
+        }
+      }
+      return obj as T;
+    });
   } finally {
     await session.close();
   }

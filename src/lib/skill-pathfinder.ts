@@ -75,7 +75,7 @@ async function findBridgeRoles(
      RETURN r.title AS title,
        current_overlap,
        target_overlap,
-       size(current_overlap) + size(target_overlap) AS bridge_score
+       toFloat(size(current_overlap) + size(target_overlap)) AS bridge_score
      ORDER BY bridge_score DESC
      LIMIT 10`,
     { currentSkills, targetSkills }
