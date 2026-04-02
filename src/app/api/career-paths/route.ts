@@ -145,8 +145,8 @@ Key skill gaps to bridge: ${JSON.stringify(skillGaps)}`;
       ...aiAnalysis,
       _source: aiSource,
       _roleMapping: {
-        current: { input: currentRole, resolved: graphCurrentRole, exact: currentResolved.exact },
-        target: { input: targetRole, resolved: graphTargetRole, exact: targetResolved.exact },
+        current: { input: currentRole, resolved: graphCurrentRole, exact: currentResolved.exact, created: currentResolved.created },
+        target: { input: targetRole, resolved: graphTargetRole, exact: targetResolved.exact, created: targetResolved.created },
       },
     });
   } catch (error) {

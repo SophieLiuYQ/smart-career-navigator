@@ -397,12 +397,16 @@ export default function Home() {
           <div className="fade-in">
             {pathsLoading && <Spinner />}
             {pathsData?._roleMapping && (!pathsData._roleMapping.current.exact || !pathsData._roleMapping.target.exact) && (
-              <div className="rounded-lg p-3 mb-4 text-[13px] text-purple-300" style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)" }}>
+              <div className="rounded-lg p-3 mb-4 text-[14px] text-purple-300" style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)" }}>
                 {!pathsData._roleMapping.current.exact && (
-                  <div>"{pathsData._roleMapping.current.input}" → mapped to <strong>{pathsData._roleMapping.current.resolved}</strong></div>
+                  <div>
+                    <strong>&ldquo;{pathsData._roleMapping.current.input}&rdquo;</strong> — AI analyzed and added to career graph
+                  </div>
                 )}
                 {!pathsData._roleMapping.target.exact && (
-                  <div>"{pathsData._roleMapping.target.input}" → mapped to <strong>{pathsData._roleMapping.target.resolved}</strong></div>
+                  <div>
+                    <strong>&ldquo;{pathsData._roleMapping.target.input}&rdquo;</strong> — AI analyzed and added to career graph
+                  </div>
                 )}
               </div>
             )}

@@ -26,8 +26,8 @@ export interface CareerPathsResponse {
   rawPaths: CareerPath[];
   _source?: string;
   _roleMapping?: {
-    current: { input: string; resolved: string; exact: boolean };
-    target: { input: string; resolved: string; exact: boolean };
+    current: { input: string; resolved: string; exact: boolean; created?: boolean };
+    target: { input: string; resolved: string; exact: boolean; created?: boolean };
   };
 }
 
