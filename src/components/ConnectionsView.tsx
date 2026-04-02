@@ -46,6 +46,30 @@ function ConnectionCard({ connection, index }: { connection: Connection; index: 
   );
 }
 
+function StrategyList({ text }: { text: string }) {
+  // Split on numbered patterns like "1)", "1.", "2)", etc.
+  const items = text.split(/\d+\)\s*|\d+\.\s+/).filter((s) => s.trim());
+
+  if (items.length <= 1) {
+    // No numbered list found — try splitting on sentences
+    return <p className="text-[12px] text-gray-400 leading-relaxed">{text}</p>;
+  }
+
+  return (
+    <ul className="space-y-2.5">
+      {items.map((item, i) => (
+        <li key={i} className="flex gap-3 text-[12px] text-gray-400 leading-relaxed">
+          <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold text-purple-300 mt-0.5"
+            style={{ background: "rgba(124,58,237,0.25)" }}>
+            {i + 1}
+          </span>
+          <span>{item.trim()}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function ConnectionsView({ data }: ConnectionsViewProps) {
   const { connections, networking_strategy } = data;
 
@@ -53,8 +77,8 @@ export default function ConnectionsView({ data }: ConnectionsViewProps) {
     <div>
       {networking_strategy && (
         <div className="rounded-[14px] p-5 mb-4" style={{ border: "1px solid rgba(124,58,237,0.2)", background: "rgba(124,58,237,0.06)" }}>
-          <div className="text-[13px] font-semibold text-purple-400 mb-2">Networking Strategy</div>
-          <p className="text-[12px] text-gray-400 leading-relaxed">{networking_strategy}</p>
+          <div className="text-[13px] font-semibold text-purple-400 mb-3">Networking Strategy</div>
+          <StrategyList text={networking_strategy} />
         </div>
       )}
       <div className="section-label">People on similar paths</div>
