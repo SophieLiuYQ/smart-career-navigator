@@ -68,10 +68,12 @@ export async function POST(request: Request) {
     };
 
     let outreach;
+    let aiSource = "anthropic";
     const rocketResult = await recommendConnections(pipelinePayload);
 
     if (rocketResult.success && rocketResult.data) {
-      console.log("[connections] Using RocketRide pipeline result");
+      aiSource = "rocketride";
+      console.log("[connections] ✅ Using RocketRide pipeline");
       try {
         outreach = typeof rocketResult.data === "string"
           ? parseJson(rocketResult.data)
@@ -81,7 +83,7 @@ export async function POST(request: Request) {
       }
     } else {
       // Fallback: Direct Anthropic call
-      console.log("[connections] RocketRide unavailable, falling back to direct Anthropic");
+      console.log("[connections] ⚠️ RocketRide unavailable, falling back to Anthropic");
       const systemPrompt = `You are a networking advisor. Given a list of connections who made career transitions relevant to the user's goal, suggest personalized outreach strategies.
 For each person, suggest a brief message or talking point that would make a meaningful connection.
 Respond ONLY with valid JSON, no markdown: { "connections": [{ "name": "...", "company": "...", "role": "...", "reason": "...", "outreach_tip": "..." }], "networking_strategy": "..." }`;
@@ -107,6 +109,7 @@ Suggest outreach strategies for each person.`;
       transitionMakers,
       intermediatePeople,
       ...outreach,
+      _source: aiSource,
     });
   } catch (error) {
     console.error("Failed to fetch connections:", error);

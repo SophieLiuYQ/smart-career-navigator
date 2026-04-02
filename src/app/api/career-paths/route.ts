@@ -75,11 +75,13 @@ export async function POST(request: Request) {
     };
 
     let aiAnalysis;
+    let aiSource = "anthropic";
     const rocketResult = await analyzeCareerPaths(pipelinePayload);
 
     if (rocketResult.success && rocketResult.data) {
       // RocketRide pipeline succeeded
-      console.log("[career-paths] Using RocketRide pipeline result");
+      aiSource = "rocketride";
+      console.log("[career-paths] ✅ Using RocketRide pipeline");
       try {
         aiAnalysis = typeof rocketResult.data === "string"
           ? parseJson(rocketResult.data)
@@ -89,7 +91,7 @@ export async function POST(request: Request) {
       }
     } else {
       // Fallback: Direct Anthropic call
-      console.log("[career-paths] RocketRide unavailable, falling back to direct Anthropic");
+      console.log("[career-paths] ⚠️ RocketRide unavailable, falling back to Anthropic");
       const systemPrompt = `You are a career advisor AI. You analyze career transition paths and provide personalized recommendations.
 Given career paths from a graph database, analyze each path and provide:
 1. A brief assessment of each path (1-2 sentences)
@@ -122,6 +124,7 @@ Key skill gaps to bridge: ${JSON.stringify(skillGaps)}`;
     return NextResponse.json({
       rawPaths,
       ...aiAnalysis,
+      _source: aiSource,
     });
   } catch (error) {
     console.error("Failed to find career paths:", error);

@@ -402,6 +402,7 @@ export default function Home() {
               </div>
             )}
             {pathsData && <CareerPathsView data={pathsData} />}
+            {pathsData && <SourceBadge source={pathsData._source} />}
             {!pathsLoading && !pathsData && (
               <EmptyState text="Complete your profile setup and click 'Find My Path' to see career paths." />
             )}
@@ -413,6 +414,7 @@ export default function Home() {
           <div className="fade-in">
             {learningLoading && <Spinner />}
             {learningData && <LearningPlanView data={learningData} />}
+            {learningData && <SourceBadge source={learningData._source} />}
             {!learningLoading && !learningData && (
               <EmptyState text="Your personalized learning plan will appear here after analysis." />
             )}
@@ -424,6 +426,7 @@ export default function Home() {
           <div className="fade-in">
             {connectionsLoading && <Spinner />}
             {connectionsData && <ConnectionsView data={connectionsData} />}
+            {connectionsData && <SourceBadge source={connectionsData._source} />}
             {!connectionsLoading && !connectionsData && (
               <EmptyState text="Connection recommendations will appear here after analysis." />
             )}
@@ -434,6 +437,7 @@ export default function Home() {
           <div className="fade-in">
             {insightsLoading && <Spinner />}
             {insightsData && <RoleInsightsView data={insightsData} />}
+            {insightsData && <SourceBadge source={insightsData._source} />}
             {!insightsLoading && !insightsData && (
               <EmptyState text="O*NET role insights will appear here after analysis." />
             )}
@@ -493,6 +497,23 @@ function EmptyState({ text }: { text: string }) {
   return (
     <div className="text-center py-16">
       <div className="text-gray-600 text-sm">{text}</div>
+    </div>
+  );
+}
+
+function SourceBadge({ source }: { source?: string }) {
+  if (!source) return null;
+  const isRocket = source === "rocketride";
+  return (
+    <div className="flex justify-end mt-4">
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-mono ${
+        isRocket
+          ? "text-green-400 border-green-500/30"
+          : "text-blue-400 border-blue-500/30"
+      }`} style={{ background: isRocket ? "rgba(34,197,94,0.1)" : "rgba(59,130,246,0.1)", border: `1px solid ${isRocket ? "rgba(34,197,94,0.25)" : "rgba(59,130,246,0.25)"}` }}>
+        <span className={`w-1.5 h-1.5 rounded-full ${isRocket ? "bg-green-400" : "bg-blue-400"}`} />
+        AI: {isRocket ? "RocketRide Pipeline" : "Anthropic Direct"}
+      </span>
     </div>
   );
 }

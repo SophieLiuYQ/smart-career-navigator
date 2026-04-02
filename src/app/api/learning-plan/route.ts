@@ -71,10 +71,12 @@ export async function POST(request: Request) {
     };
 
     let learningPlan;
+    let aiSource = "anthropic";
     const rocketResult = await generateLearningPlan(pipelinePayload);
 
     if (rocketResult.success && rocketResult.data) {
-      console.log("[learning-plan] Using RocketRide pipeline result");
+      aiSource = "rocketride";
+      console.log("[learning-plan] ✅ Using RocketRide pipeline");
       try {
         learningPlan = typeof rocketResult.data === "string"
           ? parseJson(rocketResult.data)
@@ -84,7 +86,7 @@ export async function POST(request: Request) {
       }
     } else {
       // Fallback: Direct Anthropic call
-      console.log("[learning-plan] RocketRide unavailable, falling back to direct Anthropic");
+      console.log("[learning-plan] ⚠️ RocketRide unavailable, falling back to Anthropic");
       const systemPrompt = `You are a career learning plan architect. Given skill gaps, their prerequisites, available courses, and a timeframe, create a detailed week-by-week learning plan.
 Consider prerequisite ordering — learn foundational skills before advanced ones.
 Respond ONLY with valid JSON, no markdown: { "plan": [{ "week": 1, "focus": "...", "skills": [...], "courses": [{"name": "...", "provider": "..."}], "milestone": "..." }], "summary": "..." }`;
@@ -122,6 +124,7 @@ Available courses: ${JSON.stringify(courses)}`;
       prerequisites,
       courses,
       ...learningPlan,
+      _source: aiSource,
     });
   } catch (error) {
     console.error("Failed to generate learning plan:", error);

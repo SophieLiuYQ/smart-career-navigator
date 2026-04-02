@@ -24,6 +24,7 @@ export interface CareerPathsResponse {
   overall_advice: string;
   market_insight?: string;
   rawPaths: CareerPath[];
+  _source?: string;
 }
 
 export interface SkillGap {
@@ -55,6 +56,7 @@ export interface LearningPlanResponse {
   total_weeks?: number;
   key_milestones?: string[];
   estimated_readiness?: string;
+  _source?: string;
 }
 
 export interface Connection {
@@ -72,4 +74,5 @@ export interface Connection {
 export interface ConnectionsResponse {
   connections: Connection[];
   networking_strategy?: string;
+  _source?: string;
 }

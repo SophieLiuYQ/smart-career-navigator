@@ -60,10 +60,12 @@ export async function POST(request: Request) {
 
     // Step 3: RocketRide AI Pipeline to extract structured data
     let parsed;
+    let aiSource = "anthropic";
     const rocketResult = await analyzeOnetData({ role, htmlContent: truncated, userSkills });
 
     if (rocketResult.success && rocketResult.data) {
-      console.log("[onet-insights] Using RocketRide pipeline result");
+      aiSource = "rocketride";
+      console.log("[onet-insights] ✅ Using RocketRide pipeline");
       try {
         parsed = typeof rocketResult.data === "string"
           ? JSON.parse(rocketResult.data.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim())
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
       }
     } else {
       // Fallback: Direct Anthropic call
-      console.log("[onet-insights] RocketRide unavailable, falling back to direct Anthropic");
+      console.log("[onet-insights] ⚠️ RocketRide unavailable, falling back to Anthropic");
       const systemPrompt = `You are a career data analyst. Extract structured job information from this O*NET occupation page HTML.
 The user has these skills: ${userSkills.join(", ") || "none provided"}.
 For each skill in top_skills, set "have" to true if it matches or is closely related to one of the user's skills.
@@ -104,7 +106,7 @@ Respond ONLY with valid JSON, no markdown:
       }
     }
 
-    return NextResponse.json(parsed);
+    return NextResponse.json({ ...parsed, _source: aiSource });
   } catch (error) {
     console.error("O*NET insights failed:", error);
     return NextResponse.json({ error: "Failed to fetch O*NET insights" }, { status: 500 });
