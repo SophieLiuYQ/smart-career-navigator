@@ -37,7 +37,8 @@ export async function POST(request: Request) {
   "years_experience": number,
   "skills": ["skill1", "skill2"],
   "experience": [{"title": "Job Title", "company": "Company", "duration": "2 years"}],
-  "summary": "One sentence career summary"
+  "summary": "One sentence career summary",
+  "suggested_match": "The closest standard tech role from this list: Software Engineer, Senior Software Engineer, Frontend Engineer, Backend Engineer, Full Stack Developer, Data Analyst, Data Scientist, ML Engineer, AI Engineer, DevOps Engineer, Product Manager, Engineering Manager, QA Engineer, UX Designer, Security Engineer, Mobile Developer (iOS), Mobile Developer (Android), Data Engineer, Platform Engineer, Cloud Architect, Solutions Architect, Technical Program Manager, Database Administrator, Technical Writer"
 }`,
                 },
               ]
@@ -48,7 +49,8 @@ export async function POST(request: Request) {
   "years_experience": number,
   "skills": ["skill1", "skill2"],
   "experience": [{"title": "Job Title", "company": "Company", "duration": "2 years"}],
-  "summary": "One sentence career summary"
+  "summary": "One sentence career summary",
+  "suggested_match": "The closest standard tech role from this list: Software Engineer, Senior Software Engineer, Frontend Engineer, Backend Engineer, Full Stack Developer, Data Analyst, Data Scientist, ML Engineer, AI Engineer, DevOps Engineer, Product Manager, Engineering Manager, QA Engineer, UX Designer, Security Engineer, Mobile Developer (iOS), Mobile Developer (Android), Data Engineer, Platform Engineer, Cloud Architect, Solutions Architect, Technical Program Manager, Database Administrator, Technical Writer"
 }
 
 Resume text:

@@ -28,6 +28,7 @@ interface ResumeData {
   skills?: string[];
   experience?: Array<{ title: string; company: string; duration: string }>;
   summary?: string;
+  suggested_match?: string;
 }
 
 export default function Home() {
@@ -78,12 +79,18 @@ export default function Home() {
 
       setResumeData(data);
 
-      // Auto-fill current role if we find a match
-      if (data.current_role && roles.length > 0) {
-        const match = roles.find((r) =>
-          r.title.toLowerCase().includes(data.current_role.toLowerCase()) ||
-          data.current_role.toLowerCase().includes(r.title.toLowerCase())
-        );
+      // Auto-fill current role — try suggested_match first, then fuzzy match
+      if (roles.length > 0) {
+        const suggested = data.suggested_match || data.current_role || "";
+        const match = roles.find((r) => r.title.toLowerCase() === suggested.toLowerCase())
+          || roles.find((r) =>
+            r.title.toLowerCase().includes(suggested.toLowerCase()) ||
+            suggested.toLowerCase().includes(r.title.toLowerCase())
+          )
+          || roles.find((r) =>
+            r.title.toLowerCase().includes((data.current_role || "").toLowerCase()) ||
+            (data.current_role || "").toLowerCase().includes(r.title.toLowerCase())
+          );
         if (match) setCurrentRole(match.title);
       }
     } catch (err) {
