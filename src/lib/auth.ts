@@ -1,38 +1,13 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
+import LinkedIn from "next-auth/providers/linkedin";
 import Facebook from "next-auth/providers/facebook";
+import Google from "next-auth/providers/google";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  debug: true,
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-    {
-      id: "linkedin",
-      name: "LinkedIn",
-      type: "oidc",
-      issuer: "https://www.linkedin.com/oauth",
-      clientId: process.env.LINKEDIN_CLIENT_ID,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-      authorization: {
-        params: { scope: "openid profile email" },
-      },
-      checks: ["state"],
-      profile(profile) {
-        return {
-          id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          image: profile.picture,
-        };
-      },
-    },
-    Facebook({
-      clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-    }),
+    LinkedIn,
+    Facebook,
+    Google,
   ],
   callbacks: {
     async jwt({ token, account }) {
