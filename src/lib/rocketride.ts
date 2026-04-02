@@ -1,4 +1,11 @@
-const ROCKETRIDE_URL = process.env.ROCKETRIDE_URL || "http://localhost:5565";
+// RocketRide Pipeline Client
+// Routes AI requests through RocketRide pipeline definitions (.pipe files).
+// Loads .pipe files, extracts LLM config, and executes the pipeline logic.
+// Falls back to external RocketRide server if ROCKETRIDE_URL is set.
+
+import { executePipeline, getPipelineFile } from "@/lib/rocketride-engine";
+
+const ROCKETRIDE_EXTERNAL_URL = process.env.ROCKETRIDE_URL;
 
 interface PipelineResponse {
   success: boolean;
@@ -10,28 +17,37 @@ export async function triggerPipeline(
   pipelinePath: string,
   payload: Record<string, unknown>
 ): Promise<PipelineResponse> {
-  try {
-    const response = await fetch(`${ROCKETRIDE_URL}${pipelinePath}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(15000), // 15s timeout
-    });
+  // Try external RocketRide server first (if configured and not localhost)
+  if (ROCKETRIDE_EXTERNAL_URL && !ROCKETRIDE_EXTERNAL_URL.includes("localhost")) {
+    try {
+      const response = await fetch(`${ROCKETRIDE_EXTERNAL_URL}${pipelinePath}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15000),
+      });
 
-    if (!response.ok) {
-      throw new Error(`RocketRide pipeline error: ${response.status}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`[RocketRide] ✅ External server handled ${pipelinePath}`);
+        return { success: true, data };
+      }
+    } catch {
+      console.log(`[RocketRide] External server unavailable, using internal engine`);
     }
-
-    const data = await response.json();
-    return { success: true, data };
-  } catch (error) {
-    console.error(`[RocketRide] Pipeline ${pipelinePath} failed:`, error instanceof Error ? error.message : error);
-    return {
-      success: false,
-      data: null,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
   }
+
+  // Use internal RocketRide engine — load .pipe file and execute directly
+  const pipeFile = getPipelineFile(pipelinePath);
+  if (!pipeFile) {
+    return { success: false, data: null, error: `No pipeline for ${pipelinePath}` };
+  }
+
+  const result = await executePipeline(pipeFile, payload);
+  if (result.success) {
+    console.log(`[RocketRide] ✅ Internal engine executed: ${result.pipeline}`);
+  }
+  return result;
 }
 
 export async function analyzeCareerPaths(payload: {
