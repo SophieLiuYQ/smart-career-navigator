@@ -60,6 +60,19 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => { if (Array.isArray(data)) setRoles(data); })
       .catch(() => setError("Failed to load roles. Is Neo4j running?"));
+
+    // Check if user returned from OAuth
+    import("next-auth/react").then(({ getSession }) => {
+      getSession().then((session) => {
+        if (session) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const provider = (session as any).provider as string;
+          if (provider === "linkedin") setSocial((prev) => ({ ...prev, linkedin: true }));
+          if (provider === "facebook") setSocial((prev) => ({ ...prev, facebook: true, instagram: true }));
+          if (provider === "google") setSocial((prev) => ({ ...prev, linkedin: true })); // Google as fallback
+        }
+      });
+    });
   }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,13 +115,28 @@ export default function Home() {
   };
 
   const toggleSocial = async (platform: keyof SocialState) => {
-    // LinkedIn uses OAuth via NextAuth
-    if (platform === "linkedin" && !social.linkedin) {
-      const { signIn } = await import("next-auth/react");
-      signIn("linkedin", { redirect: false });
+    if (social[platform]) {
+      // Already connected — disconnect
+      setSocial((prev) => ({ ...prev, [platform]: false }));
       return;
     }
-    setSocial((prev) => ({ ...prev, [platform]: !prev[platform] }));
+    // Map platform to NextAuth provider
+    const providerMap: Record<string, string> = {
+      linkedin: "linkedin",
+      facebook: "facebook",
+      instagram: "facebook", // Instagram uses Facebook OAuth
+    };
+    const provider = providerMap[platform];
+    if (provider) {
+      const { signIn } = await import("next-auth/react");
+      const result = await signIn(provider, { redirect: false, callbackUrl: "/" });
+      if (result?.url) {
+        // OAuth redirect needed
+        window.location.href = result.url;
+      } else if (result?.ok) {
+        setSocial((prev) => ({ ...prev, [platform]: true }));
+      }
+    }
   };
 
   const getAiInsight = () => {
