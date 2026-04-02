@@ -66,12 +66,11 @@ async function findBridgeRoles(
     target_overlap: string[];
     bridge_score: number;
   }>(
-    `WITH $currentSkills AS currentSkills, $targetSkills AS targetSkills
-     MATCH (r:Role)-[:REQUIRES_SKILL]->(s:Skill)
-     WITH r, collect(s.name) AS roleSkills, currentSkills, targetSkills
+    `MATCH (r:Role)-[:REQUIRES_SKILL]->(s:Skill)
+     WITH r, collect(s.name) AS roleSkills
      WITH r, roleSkills,
-       [sk IN roleSkills WHERE sk IN currentSkills] AS current_overlap,
-       [sk IN roleSkills WHERE sk IN targetSkills] AS target_overlap
+       [sk IN roleSkills WHERE sk IN $currentSkills] AS current_overlap,
+       [sk IN roleSkills WHERE sk IN $targetSkills] AS target_overlap
      WHERE size(current_overlap) > 0 AND size(target_overlap) > 0
      RETURN r.title AS title,
        current_overlap,
@@ -105,10 +104,16 @@ export async function findSkillBasedPaths(
   bridgeRoles: BridgeRole[];
 }> {
   // Step 1: Get skills for both roles
-  const [currentSkills, targetSkills] = await Promise.all([
-    getSkillsForRole(currentRole),
-    getSkillsForRole(targetRole),
-  ]);
+  let currentSkills: string[] = [];
+  let targetSkills: string[] = [];
+  try {
+    [currentSkills, targetSkills] = await Promise.all([
+      getSkillsForRole(currentRole),
+      getSkillsForRole(targetRole),
+    ]);
+  } catch (e) {
+    console.error("[skill-pathfinder] Failed to get skills:", e);
+  }
 
   // Merge user's actual skills with role skills
   const allCurrentSkills = [...new Set([...currentSkills, ...(userSkills || [])])];
@@ -119,7 +124,12 @@ export async function findSkillBasedPaths(
   );
 
   // Step 3: Find bridge roles from Neo4j
-  const bridgeRoles = await findBridgeRoles(allCurrentSkills, targetSkills);
+  let bridgeRoles: BridgeRole[] = [];
+  try {
+    bridgeRoles = await findBridgeRoles(allCurrentSkills, targetSkills);
+  } catch (e) {
+    console.error("[skill-pathfinder] Failed to find bridge roles:", e);
+  }
 
   // Step 4: Build paths through bridge roles
   let paths: SkillPath[] = [];

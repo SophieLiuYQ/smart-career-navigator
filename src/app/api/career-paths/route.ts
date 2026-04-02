@@ -22,10 +22,18 @@ export async function POST(request: Request) {
     }
 
     // Resolve roles (creates in Neo4j if new)
-    const [currentResolved, targetResolved] = await Promise.all([
-      resolveRole(currentRole),
-      resolveRole(targetRole),
-    ]);
+    let currentResolved, targetResolved;
+    try {
+      [currentResolved, targetResolved] = await Promise.all([
+        resolveRole(currentRole),
+        resolveRole(targetRole),
+      ]);
+    } catch (e) {
+      console.error("[career-paths] Role resolution failed:", e);
+      // Fallback: use roles as-is
+      currentResolved = { resolved: currentRole, original: currentRole, exact: false, created: false };
+      targetResolved = { resolved: targetRole, original: targetRole, exact: false, created: false };
+    }
 
     // Skill-first pathfinding
     const skillResult = await findSkillBasedPaths(
