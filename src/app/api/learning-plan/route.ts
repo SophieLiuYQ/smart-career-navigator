@@ -79,11 +79,15 @@ export async function POST(request: Request) {
       console.log("[learning-plan] ✅ Using RocketRide pipeline");
       try {
         const data = rocketResult.data;
-        if (typeof data === "string") {
-          learningPlan = parseJson(data);
-        } else if (typeof data === "object" && data !== null && "raw" in data) {
-          // Engine couldn't parse — try once more
-          learningPlan = parseJson((data as { raw: string }).raw);
+        // If engine returned { raw: "..." }, parse the raw string
+        const rawStr = (typeof data === "object" && data !== null && "raw" in data)
+          ? (data as { raw: string }).raw
+          : null;
+        if (rawStr) {
+          const cleaned = rawStr.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+          learningPlan = JSON.parse(cleaned);
+        } else if (typeof data === "string") {
+          learningPlan = JSON.parse(data.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim());
         } else {
           learningPlan = data;
         }

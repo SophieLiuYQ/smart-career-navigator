@@ -76,10 +76,12 @@ export async function POST(request: Request) {
       console.log("[connections] ✅ Using RocketRide pipeline");
       try {
         const data = rocketResult.data;
-        if (typeof data === "string") {
-          outreach = parseJson(data);
-        } else if (typeof data === "object" && data !== null && "raw" in data) {
-          outreach = parseJson((data as { raw: string }).raw);
+        const rawStr = (typeof data === "object" && data !== null && "raw" in data)
+          ? (data as { raw: string }).raw : null;
+        if (rawStr) {
+          outreach = JSON.parse(rawStr.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim());
+        } else if (typeof data === "string") {
+          outreach = JSON.parse(data.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim());
         } else {
           outreach = data;
         }

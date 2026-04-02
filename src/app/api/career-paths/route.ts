@@ -83,10 +83,12 @@ export async function POST(request: Request) {
       console.log("[career-paths] ✅ Using RocketRide pipeline");
       try {
         const data = rocketResult.data;
-        if (typeof data === "string") {
-          aiAnalysis = parseJson(data);
-        } else if (typeof data === "object" && data !== null && "raw" in data) {
-          aiAnalysis = parseJson((data as { raw: string }).raw);
+        const rawStr = (typeof data === "object" && data !== null && "raw" in data)
+          ? (data as { raw: string }).raw : null;
+        if (rawStr) {
+          aiAnalysis = JSON.parse(rawStr.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim());
+        } else if (typeof data === "string") {
+          aiAnalysis = JSON.parse(data.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim());
         } else {
           aiAnalysis = data;
         }
