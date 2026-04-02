@@ -5,6 +5,7 @@ import CareerPathsView from "@/components/CareerPathsView";
 import LearningPlanView from "@/components/LearningPlanView";
 import ConnectionsView from "@/components/ConnectionsView";
 import GraphVisualization from "@/components/GraphVisualization";
+import RoleInsightsView from "@/components/RoleInsightsView";
 import RoleCombobox from "@/components/RoleCombobox";
 import type {
   Role,
@@ -14,7 +15,7 @@ import type {
   SkillGap,
 } from "@/types";
 
-type Tab = "setup" | "paths" | "learning" | "connections";
+type Tab = "setup" | "paths" | "learning" | "connections" | "insights";
 
 interface SocialState {
   linkedin: boolean;
@@ -54,6 +55,9 @@ export default function Home() {
   const [pathsLoading, setPathsLoading] = useState(false);
   const [learningLoading, setLearningLoading] = useState(false);
   const [connectionsLoading, setConnectionsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [insightsData, setInsightsData] = useState<any>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -174,6 +178,7 @@ export default function Home() {
     setPathsData(null);
     setLearningData(null);
     setConnectionsData(null);
+    setInsightsData(null);
     setActiveTab("paths");
 
     const fetchPaths = async () => {
@@ -218,8 +223,20 @@ export default function Home() {
       finally { setConnectionsLoading(false); }
     };
 
+    const fetchInsights = async () => {
+      setInsightsLoading(true);
+      try {
+        const userSkills = resumeData?.skills || [];
+        const res = await fetch("/api/onet-insights", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: targetRole, userSkills }) });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        setInsightsData(data);
+      } catch { console.error("Failed to fetch O*NET insights"); }
+      finally { setInsightsLoading(false); }
+    };
+
     try {
-      const [, skillGaps] = await Promise.all([fetchPaths(), fetchSkillGaps()]);
+      const [, skillGaps] = await Promise.all([fetchPaths(), fetchSkillGaps(), fetchInsights()]);
       await Promise.all([fetchLearning(skillGaps), fetchConnections()]);
     } finally { setLoading(false); }
   }, [currentRole, targetRole]);
@@ -229,6 +246,7 @@ export default function Home() {
     { key: "paths", label: "Career Paths" },
     { key: "learning", label: "Learning Plan" },
     { key: "connections", label: "Connections" },
+    { key: "insights", label: "Role Insights" },
   ];
 
   const aiInsight = getAiInsight();
@@ -408,6 +426,16 @@ export default function Home() {
             {connectionsData && <ConnectionsView data={connectionsData} />}
             {!connectionsLoading && !connectionsData && (
               <EmptyState text="Connection recommendations will appear here after analysis." />
+            )}
+          </div>
+        )}
+
+        {activeTab === "insights" && (
+          <div className="fade-in">
+            {insightsLoading && <Spinner />}
+            {insightsData && <RoleInsightsView data={insightsData} />}
+            {!insightsLoading && !insightsData && (
+              <EmptyState text="O*NET role insights will appear here after analysis." />
             )}
           </div>
         )}
