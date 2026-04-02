@@ -79,15 +79,22 @@ export async function POST(request: Request) {
     const rocketResult = await analyzeCareerPaths(pipelinePayload);
 
     if (rocketResult.success && rocketResult.data) {
-      // RocketRide pipeline succeeded
       aiSource = "rocketride";
       console.log("[career-paths] ✅ Using RocketRide pipeline");
       try {
-        aiAnalysis = typeof rocketResult.data === "string"
-          ? parseJson(rocketResult.data)
-          : rocketResult.data;
+        const data = rocketResult.data;
+        if (typeof data === "string") {
+          aiAnalysis = parseJson(data);
+        } else if (typeof data === "object" && data !== null && "raw" in data) {
+          aiAnalysis = parseJson((data as { raw: string }).raw);
+        } else {
+          aiAnalysis = data;
+        }
       } catch {
-        aiAnalysis = rocketResult.data;
+        aiAnalysis = {
+          paths: rawPaths.map((p, i) => ({ roles: p.role_names, assessment: "AI analysis.", recommended: i === 0 })),
+          overall_advice: typeof rocketResult.data === "string" ? rocketResult.data : "Analysis complete.",
+        };
       }
     } else {
       // Fallback: Direct Anthropic call

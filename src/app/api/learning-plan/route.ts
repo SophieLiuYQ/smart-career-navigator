@@ -78,11 +78,17 @@ export async function POST(request: Request) {
       aiSource = "rocketride";
       console.log("[learning-plan] ✅ Using RocketRide pipeline");
       try {
-        learningPlan = typeof rocketResult.data === "string"
-          ? parseJson(rocketResult.data)
-          : rocketResult.data;
+        const data = rocketResult.data;
+        if (typeof data === "string") {
+          learningPlan = parseJson(data);
+        } else if (typeof data === "object" && data !== null && "raw" in data) {
+          // Engine couldn't parse — try once more
+          learningPlan = parseJson((data as { raw: string }).raw);
+        } else {
+          learningPlan = data;
+        }
       } catch {
-        learningPlan = rocketResult.data;
+        learningPlan = { plan: [], summary: typeof rocketResult.data === "string" ? rocketResult.data : "AI-generated plan" };
       }
     } else {
       // Fallback: Direct Anthropic call

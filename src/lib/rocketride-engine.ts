@@ -73,14 +73,20 @@ export async function executePipeline(
       JSON.stringify(payload)
     );
 
-    // Parse the response
+    // Parse the response — must return an object, never a raw string
     let parsed;
     try {
       const cleaned = response.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       const match = cleaned.match(/\{[\s\S]*\}/);
       parsed = JSON.parse(match ? match[0] : cleaned);
     } catch {
-      parsed = response;
+      // If we can't parse as JSON object, wrap it
+      parsed = { raw: response };
+    }
+
+    // Ensure we always return an object
+    if (typeof parsed === "string") {
+      parsed = { raw: parsed };
     }
 
     return { success: true, data: parsed, pipeline: pipeline.name };
