@@ -68,9 +68,11 @@ export async function executePipeline(
   console.log(`[RocketRide Engine] LLM node: ${llmNode.id} (${llmNode.type})`);
 
   try {
+    const maxTokens = (llmNode.config.max_tokens as number) || 4096;
     const response = await generateCompletion(
       llmNode.config.system_prompt,
-      JSON.stringify(payload)
+      JSON.stringify(payload),
+      maxTokens
     );
 
     // Parse the response — must return an object, never a raw string
