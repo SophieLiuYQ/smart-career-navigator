@@ -260,8 +260,8 @@ export default function Home() {
             <svg width="14" height="14" viewBox="0 0 16 16" fill="white"><path d="M8 1L15 5V11L8 15L1 11V5L8 1Z" /></svg>
           </div>
           <div>
-            <div className="text-[15px] font-semibold" style={{ letterSpacing: "-0.3px" }}>Career Navigator</div>
-            <div className="text-[11px] text-gray-500 font-mono">AI-Powered Path Intelligence</div>
+            <div className="text-[17px] font-semibold" style={{ letterSpacing: "-0.3px" }}>Career Navigator</div>
+            <div className="text-[13px] text-gray-500 font-mono">AI-Powered Path Intelligence</div>
           </div>
         </div>
         <div className="flex">
@@ -306,7 +306,7 @@ export default function Home() {
               </div>
               {resumeParsing ? (
                 <>
-                  <div className="text-[13px] font-medium text-purple-300">Analyzing resume...</div>
+                  <div className="text-[15px] font-medium text-purple-300">Analyzing resume...</div>
                   <svg className="animate-spin h-5 w-5 text-purple-400" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -314,28 +314,28 @@ export default function Home() {
                 </>
               ) : resumeData ? (
                 <>
-                  <div className="text-[13px] font-medium text-purple-300">
+                  <div className="text-[15px] font-medium text-purple-300">
                     {resumeData.name || "Resume"} — {resumeData.current_role || "Parsed"}
                   </div>
-                  <div className="text-[11px] text-gray-500">
+                  <div className="text-[13px] text-gray-500">
                     {resumeData.years_experience ? `${resumeData.years_experience} yrs experience` : ""}
                     {resumeData.skills ? ` · ${resumeData.skills.slice(0, 5).join(", ")}` : ""}
                   </div>
-                  <div className="px-2.5 py-1 rounded-md text-[11px] font-mono text-purple-400" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}>
+                  <div className="px-2.5 py-1 rounded-md text-[13px] font-mono text-purple-400" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}>
                     {resumeFile}
                   </div>
                 </>
               ) : resumeFile ? (
                 <>
-                  <div className="text-[13px] font-medium text-purple-300">Resume uploaded</div>
-                  <div className="px-2.5 py-1 rounded-md text-[11px] font-mono text-purple-400" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}>
+                  <div className="text-[15px] font-medium text-purple-300">Resume uploaded</div>
+                  <div className="px-2.5 py-1 rounded-md text-[13px] font-mono text-purple-400" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}>
                     {resumeFile}
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="text-[13px] font-medium text-purple-300">Upload your resume</div>
-                  <div className="text-[11px] text-gray-600">PDF or DOCX · We&apos;ll extract your experience automatically</div>
+                  <div className="text-[15px] font-medium text-purple-300">Upload your resume</div>
+                  <div className="text-[13px] text-gray-600">PDF or DOCX · We&apos;ll extract your experience automatically</div>
                 </>
               )}
             </div>
@@ -354,7 +354,7 @@ export default function Home() {
             {aiInsight && (
               <div className="ai-strip mb-5">
                 <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: "#7c3aed" }} />
-                <div className="text-[12px] text-gray-400 leading-relaxed">{aiInsight}</div>
+                <div className="text-[14px] text-gray-400 leading-relaxed">{aiInsight}</div>
               </div>
             )}
 
@@ -362,7 +362,7 @@ export default function Home() {
             <div className="section-label">Your Journey</div>
             <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center mb-5">
               <div>
-                <div className="text-[10px] text-gray-600 uppercase tracking-widest font-medium mb-1.5">Current Role</div>
+                <div className="text-[12px] text-gray-600 uppercase tracking-widest font-medium mb-1.5">Current Role</div>
                 <RoleCombobox
                   value={currentRole}
                   onChange={setCurrentRole}
@@ -372,7 +372,7 @@ export default function Home() {
               </div>
               <div className="text-gray-600 text-lg pt-4">→</div>
               <div>
-                <div className="text-[10px] text-gray-600 uppercase tracking-widest font-medium mb-1.5">Dream Role</div>
+                <div className="text-[12px] text-gray-600 uppercase tracking-widest font-medium mb-1.5">Dream Role</div>
                 <RoleCombobox
                   value={targetRole}
                   onChange={setTargetRole}
@@ -460,13 +460,13 @@ function SocialCard({ name, linked, onClick, color, icon, profileName, profileIm
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-medium">{linked && profileName ? profileName : name}</div>
-        <div className={`text-[11px] ${linked ? "text-green-400" : "text-gray-600"}`}>
+        <div className="text-[15px] font-medium">{linked && profileName ? profileName : name}</div>
+        <div className={`text-[13px] ${linked ? "text-green-400" : "text-gray-600"}`}>
           {linked ? "Connected" : "Not connected"}
         </div>
       </div>
       <button
-        className={`text-[11px] px-3 py-1 rounded-md border transition-all font-[Sora] ${
+        className={`text-[13px] px-3 py-1 rounded-md border transition-all font-[Sora] ${
           linked
             ? "border-green-500/30 text-green-400"
             : "border-white/10 text-gray-400 hover:bg-white/5 hover:text-white"

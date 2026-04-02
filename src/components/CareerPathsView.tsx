@@ -34,7 +34,7 @@ export default function CareerPathsView({ data }: CareerPathsViewProps) {
             style={{ animationDelay: `${idx * 0.1}s` }}
           >
             {path.recommended && (
-              <div className="inline-block px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider mb-3.5"
+              <div className="inline-block px-2.5 py-1 rounded-full text-[12px] font-semibold uppercase tracking-wider mb-3.5"
                 style={{ background: "rgba(255,165,0,0.15)", color: "#f59e0b", letterSpacing: "1px" }}>
                 Recommended
               </div>
@@ -43,7 +43,7 @@ export default function CareerPathsView({ data }: CareerPathsViewProps) {
             <div className="flex flex-wrap items-center gap-2 mb-3">
               {path.roles.map((role, rIdx) => (
                 <React.Fragment key={rIdx}>
-                  <span className={`px-3.5 py-1.5 rounded-lg text-[12px] font-medium border ${
+                  <span className={`px-3.5 py-1.5 rounded-lg text-[14px] font-medium border ${
                     rIdx === 0
                       ? "text-green-400 border-green-500/30"
                       : rIdx === path.roles.length - 1
@@ -58,27 +58,27 @@ export default function CareerPathsView({ data }: CareerPathsViewProps) {
                     {role}
                   </span>
                   {rIdx < path.roles.length - 1 && (
-                    <span className="text-gray-600 text-[12px]">›</span>
+                    <span className="text-gray-600 text-[14px]">›</span>
                   )}
                 </React.Fragment>
               ))}
             </div>
 
             {raw && (
-              <div className="text-[11px] text-gray-600 mb-2.5 font-mono">
+              <div className="text-[13px] text-gray-600 mb-2.5 font-mono">
                 ~{Math.round(raw.total_months)} months · {(raw.path_probability * 100).toFixed(1)}% probability
               </div>
             )}
 
-            <p className="text-[12px] text-gray-400 leading-relaxed">{path.assessment}</p>
+            <p className="text-[14px] text-gray-400 leading-relaxed">{path.assessment}</p>
           </div>
         );
       })}
 
       {overall_advice && (
         <div className="rounded-[14px] p-5 mt-4" style={{ border: "1px solid rgba(59,130,246,0.2)", background: "rgba(59,130,246,0.04)" }}>
-          <div className="text-[13px] font-semibold text-blue-400 mb-2.5">AI Career Advisor</div>
-          <p className="text-[12px] text-gray-400 leading-relaxed">{overall_advice}</p>
+          <div className="text-[15px] font-semibold text-blue-400 mb-2.5">AI Career Advisor</div>
+          <p className="text-[14px] text-gray-400 leading-relaxed">{overall_advice}</p>
         </div>
       )}
     </div>

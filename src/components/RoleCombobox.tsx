@@ -77,7 +77,7 @@ export default function RoleCombobox({ value, onChange, options, placeholder }: 
           {filtered.map((option) => (
             <button
               key={option}
-              className="w-full text-left px-3 py-2 text-[13px] text-gray-300 hover:text-white transition-colors"
+              className="w-full text-left px-3 py-2 text-[15px] text-gray-300 hover:text-white transition-colors"
               style={{ background: option === value ? "rgba(124,58,237,0.15)" : "transparent" }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(124,58,237,0.1)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = option === value ? "rgba(124,58,237,0.15)" : "transparent")}
