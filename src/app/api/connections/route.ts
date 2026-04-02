@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { generateCompletion } from "@/lib/anthropic";
 import { recommendConnections } from "@/lib/rocketride";
+import { resolveRole } from "@/lib/role-matcher";
 
 interface TransitionPerson {
   name: string;
@@ -34,6 +35,13 @@ export async function POST(request: Request) {
       );
     }
 
+    const [currentResolved, targetResolved] = await Promise.all([
+      resolveRole(currentRole),
+      resolveRole(targetRole),
+    ]);
+    const graphCurrent = currentResolved.resolved;
+    const graphTarget = targetResolved.resolved;
+
     // Neo4j: Find people who made this transition + intermediate contacts
     const [transitionMakers, intermediatePeople] = await Promise.all([
       runQuery<TransitionPerson>(
@@ -44,7 +52,7 @@ export async function POST(request: Request) {
          RETURN p.name AS name, p.years_exp AS years_exp, company.name AS company,
            collect(DISTINCT s.name) AS skills
          LIMIT 10`,
-        { currentRole, targetRole }
+        { currentRole: graphCurrent, targetRole: graphTarget }
       ),
       runQuery<IntermediatePerson>(
         `MATCH path = shortestPath(
@@ -55,7 +63,7 @@ export async function POST(request: Request) {
          OPTIONAL MATCH (p)-[:WORKS_AT]->(company:Company)
          RETURN p.name AS name, intermediate.title AS role, company.name AS company, p.years_exp AS years_exp
          LIMIT 10`,
-        { currentRole, targetRole }
+        { currentRole: graphCurrent, targetRole: graphTarget }
       ),
     ]);
 

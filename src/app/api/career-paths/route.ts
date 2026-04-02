@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { generateCompletion } from "@/lib/anthropic";
 import { analyzeCareerPaths } from "@/lib/rocketride";
+import { resolveRole } from "@/lib/role-matcher";
 
 interface CareerPath {
   role_names: string[];
@@ -31,6 +32,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Resolve user-typed roles to Neo4j roles
+    const [currentResolved, targetResolved] = await Promise.all([
+      resolveRole(currentRole),
+      resolveRole(targetRole),
+    ]);
+
+    const graphCurrentRole = currentResolved.resolved;
+    const graphTargetRole = targetResolved.resolved;
+
     // Neo4j: Graph pathfinding
     const rawPaths = await runQuery<CareerPath>(
       `MATCH path = allShortestPaths(
@@ -43,7 +53,7 @@ export async function POST(request: Request) {
       RETURN role_names, total_months, path_probability
       ORDER BY path_probability DESC, total_months ASC
       LIMIT 5`,
-      { currentRole, targetRole }
+      { currentRole: graphCurrentRole, targetRole: graphTargetRole }
     );
 
     if (rawPaths.length === 0) {
@@ -63,7 +73,7 @@ export async function POST(request: Request) {
        RETURN s.name AS skill, req.importance AS importance
        ORDER BY req.importance DESC
        LIMIT 10`,
-      { currentRole, targetRole }
+      { currentRole: graphCurrentRole, targetRole: graphTargetRole }
     );
 
     // RocketRide AI Pipeline: Analyze career paths
@@ -134,6 +144,10 @@ Key skill gaps to bridge: ${JSON.stringify(skillGaps)}`;
       rawPaths,
       ...aiAnalysis,
       _source: aiSource,
+      _roleMapping: {
+        current: { input: currentRole, resolved: graphCurrentRole, exact: currentResolved.exact },
+        target: { input: targetRole, resolved: graphTargetRole, exact: targetResolved.exact },
+      },
     });
   } catch (error) {
     console.error("Failed to find career paths:", error);

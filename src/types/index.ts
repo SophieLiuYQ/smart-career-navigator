@@ -25,6 +25,10 @@ export interface CareerPathsResponse {
   market_insight?: string;
   rawPaths: CareerPath[];
   _source?: string;
+  _roleMapping?: {
+    current: { input: string; resolved: string; exact: boolean };
+    target: { input: string; resolved: string; exact: boolean };
+  };
 }
 
 export interface SkillGap {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { resolveRole } from "@/lib/role-matcher";
 
 interface SkillGapResult {
   skill: string;
@@ -24,7 +25,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get skills required by target that current role doesn't have (minus user's existing skills)
+    const [currentResolved, targetResolved] = await Promise.all([
+      resolveRole(currentRole),
+      resolveRole(targetRole),
+    ]);
+
     const skillGaps = await runQuery<SkillGapResult>(
       `MATCH (target:Role {title: $targetRole})-[req:REQUIRES_SKILL]->(s:Skill)
        WHERE NOT s.name IN $userSkills
@@ -35,7 +40,7 @@ export async function POST(request: Request) {
        RETURN s.name AS skill, s.category AS category, req.importance AS importance,
          collect(CASE WHEN c IS NOT NULL THEN {name: c.name, provider: c.provider, duration: c.duration, url: c.url} END) AS courses
        ORDER BY req.importance DESC`,
-      { currentRole, targetRole, userSkills }
+      { currentRole: currentResolved.resolved, targetRole: targetResolved.resolved, userSkills }
     );
 
     // Filter out null courses
