@@ -75,13 +75,22 @@ export async function executePipeline(
 
     // Parse the response — must return an object, never a raw string
     let parsed;
+    const cleaned = response.replace(/```json\n?/g, "").replace(/```\n?/g, "").replace(/^[^{]*/, "").trim();
     try {
-      const cleaned = response.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      const match = cleaned.match(/\{[\s\S]*\}/);
-      parsed = JSON.parse(match ? match[0] : cleaned);
+      // Try full response as JSON
+      parsed = JSON.parse(cleaned);
     } catch {
-      // If we can't parse as JSON object, wrap it
-      parsed = { raw: response };
+      try {
+        // Try extracting JSON object
+        const objMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (objMatch) {
+          parsed = JSON.parse(objMatch[0]);
+        } else {
+          parsed = { raw: response };
+        }
+      } catch {
+        parsed = { raw: response };
+      }
     }
 
     // Ensure we always return an object

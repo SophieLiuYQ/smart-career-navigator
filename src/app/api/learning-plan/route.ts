@@ -88,7 +88,20 @@ export async function POST(request: Request) {
           learningPlan = data;
         }
       } catch {
-        learningPlan = { plan: [], summary: typeof rocketResult.data === "string" ? rocketResult.data : "AI-generated plan" };
+        // Last resort: try to extract plan array from raw data
+        const rawStr = typeof rocketResult.data === "object" && rocketResult.data !== null && "raw" in rocketResult.data
+          ? (rocketResult.data as { raw: string }).raw
+          : typeof rocketResult.data === "string" ? rocketResult.data : "";
+        try {
+          const arrayMatch = rawStr.replace(/```json\n?/g, "").replace(/```\n?/g, "").match(/\[[\s\S]*\]/);
+          if (arrayMatch) {
+            learningPlan = { plan: JSON.parse(arrayMatch[0]), summary: "AI-generated learning plan" };
+          } else {
+            learningPlan = { plan: [], summary: rawStr || "AI-generated plan" };
+          }
+        } catch {
+          learningPlan = { plan: [], summary: rawStr || "AI-generated plan" };
+        }
       }
     } else {
       // Fallback: Direct Anthropic call
