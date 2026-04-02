@@ -1,0 +1,494 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .app {
+    font-family: 'Sora', sans-serif;
+    background: #0d1021;
+    color: #e8e9f3;
+    min-height: 600px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .header {
+    padding: 28px 32px 0;
+    background: linear-gradient(180deg, #131629 0%, #0d1021 100%);
+    border-bottom: 1px solid rgba(120, 100, 255, 0.15);
+  }
+
+  .logo-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+  }
+  .logo-dot {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #7b5ef8, #3b82f6);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-dot svg { width: 14px; height: 14px; fill: white; }
+  .logo-text { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: #6b7280; font-weight: 400; font-family: 'DM Mono', monospace; }
+
+  .nav-tabs { display: flex; gap: 0; }
+  .nav-tab {
+    padding: 10px 20px; font-size: 13px; font-weight: 400; color: #6b7280;
+    border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .nav-tab.active { color: #a78bfa; border-bottom-color: #7c3aed; font-weight: 500; }
+  .nav-tab:hover:not(.active) { color: #9ca3af; }
+
+  .content { padding: 24px 32px; }
+
+  /* Profile Section */
+  .section-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 1.5px;
+    color: #4c4f6b; text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+  .upload-zone {
+    border: 1.5px dashed rgba(120, 100, 255, 0.3);
+    border-radius: 12px; padding: 24px 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    background: rgba(124, 58, 237, 0.04);
+    cursor: pointer; transition: all 0.2s;
+    grid-column: 1 / -1;
+  }
+  .upload-zone:hover { border-color: rgba(120, 100, 255, 0.6); background: rgba(124, 58, 237, 0.08); }
+  .upload-zone.has-file { border-style: solid; border-color: rgba(120, 100, 255, 0.4); }
+  .upload-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(124, 58, 237, 0.15); display: flex; align-items: center; justify-content: center; }
+  .upload-title { font-size: 13px; font-weight: 500; color: #c4b5fd; }
+  .upload-sub { font-size: 11px; color: #4c4f6b; }
+  .file-badge { background: rgba(124, 58, 237, 0.2); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 6px; padding: 4px 10px; font-size: 11px; color: #a78bfa; font-family: 'DM Mono', monospace; }
+
+  .social-card {
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,0.02); cursor: pointer; transition: all 0.2s;
+  }
+  .social-card:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); }
+  .social-card.linked { border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.04); }
+
+  .social-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .si-linkedin { background: rgba(10, 102, 194, 0.2); }
+  .si-facebook { background: rgba(24, 119, 242, 0.15); }
+  .si-instagram { background: rgba(225, 48, 108, 0.15); }
+
+  .social-name { font-size: 13px; font-weight: 500; }
+  .social-status { font-size: 11px; color: #4c4f6b; }
+  .social-card.linked .social-status { color: #4ade80; }
+  .link-btn { margin-left: auto; font-size: 11px; padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: #9ca3af; cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.2s; }
+  .link-btn.linked-btn { border-color: rgba(34,197,94,0.3); color: #4ade80; }
+  .link-btn:hover:not(.linked-btn) { background: rgba(255,255,255,0.06); color: #e8e9f3; }
+
+  .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 20px 0; }
+
+  /* Role selectors */
+  .role-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; margin-bottom: 20px; }
+  .role-select-wrap { position: relative; }
+  .role-label { font-size: 10px; color: #4c4f6b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
+  .role-select {
+    width: 100%; padding: 10px 14px; font-size: 13px; font-weight: 500;
+    border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04); color: #e8e9f3;
+    font-family: 'Sora', sans-serif; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+  }
+  .role-select:focus { outline: none; border-color: rgba(124, 58, 237, 0.5); }
+  .role-arrow { text-align: center; color: #4c4f6b; font-size: 18px; padding-top: 18px; }
+
+  /* AI insight strip */
+  .ai-strip {
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 10px; padding: 12px 16px;
+    background: rgba(124, 58, 237, 0.06);
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #7c3aed; margin-top: 4px; flex-shrink: 0; }
+  .ai-text { font-size: 12px; color: #9ca3af; line-height: 1.6; }
+  .ai-text strong { color: #c4b5fd; font-weight: 500; }
+
+  /* CTA button */
+  .cta-btn {
+    width: 100%; padding: 14px; font-size: 14px; font-weight: 600;
+    border-radius: 12px; border: none; cursor: pointer;
+    background: linear-gradient(135deg, #7c3aed, #3b82f6);
+    color: white; font-family: 'Sora', sans-serif;
+    letter-spacing: 0.3px; transition: opacity 0.2s;
+  }
+  .cta-btn:hover { opacity: 0.9; }
+  .cta-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* Results panel */
+  .result-hidden { display: none; }
+
+  .path-card {
+    border: 1px solid rgba(255, 165, 0, 0.25); border-radius: 14px;
+    padding: 20px; margin-bottom: 16px;
+    background: rgba(255, 165, 0, 0.03);
+  }
+  .recommended-badge { display: inline-block; background: rgba(255, 165, 0, 0.15); color: #f59e0b; font-size: 10px; font-weight: 600; letter-spacing: 1px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; margin-bottom: 14px; }
+
+  .path-nodes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .path-node {
+    padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500;
+    border: 1px solid rgba(255,255,255,0.1); color: #c4b5fd; background: rgba(124,58,237,0.12);
+  }
+  .path-node.current { background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34,197,94,0.3); }
+  .path-node.target { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245,158,11,0.3); }
+  .path-arrow { color: #4c4f6b; font-size: 12px; }
+
+  .path-meta { font-size: 11px; color: #4c4f6b; margin-bottom: 10px; font-family: 'DM Mono', monospace; }
+  .path-desc { font-size: 12px; color: #9ca3af; line-height: 1.7; }
+
+  .advisor-card {
+    border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 14px;
+    padding: 20px; background: rgba(59, 130, 246, 0.04);
+  }
+  .advisor-title { font-size: 13px; font-weight: 600; color: #60a5fa; margin-bottom: 10px; }
+  .advisor-text { font-size: 12px; color: #9ca3af; line-height: 1.8; }
+
+  /* Learning plan */
+  .plan-overview {
+    border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 14px;
+    padding: 18px; margin-bottom: 20px; background: rgba(59, 130, 246, 0.04);
+  }
+  .plan-ov-title { font-size: 13px; font-weight: 600; color: #60a5fa; margin-bottom: 8px; }
+  .plan-ov-text { font-size: 12px; color: #9ca3af; line-height: 1.7; }
+
+  .timeline { position: relative; padding-left: 40px; }
+  .timeline::before { content: ''; position: absolute; left: 13px; top: 0; bottom: 0; width: 1px; background: rgba(124,58,237,0.2); }
+
+  .timeline-item { position: relative; margin-bottom: 16px; }
+  .timeline-num { position: absolute; left: -40px; width: 26px; height: 26px; border-radius: 50%; background: rgba(124,58,237,0.3); border: 1px solid rgba(124,58,237,0.5); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #c4b5fd; font-family: 'DM Mono', monospace; }
+  .timeline-card { border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px 16px; background: rgba(255,255,255,0.02); }
+  .tl-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .tl-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .tl-tag { padding: 3px 9px; border-radius: 20px; font-size: 10px; border: 1px solid rgba(124,58,237,0.3); color: #a78bfa; background: rgba(124,58,237,0.1); }
+  .tl-course { font-size: 11px; color: #6b7280; margin-bottom: 6px; }
+  .tl-milestone { font-size: 11px; color: #22c55e; font-style: italic; }
+
+  /* Connections tab */
+  .conn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .conn-card { border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; background: rgba(255,255,255,0.02); }
+  .conn-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .conn-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .conn-role { font-size: 11px; color: #6b7280; margin-bottom: 8px; }
+  .conn-badge { display: inline-block; font-size: 10px; padding: 3px 8px; border-radius: 20px; background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+
+  .footer { text-align: center; padding: 16px; border-top: 1px solid rgba(255,255,255,0.04); font-size: 10px; color: #2d2f45; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+</style>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-dot">
+        <svg viewBox="0 0 16 16"><path d="M8 1L15 5V11L8 15L1 11V5L8 1Z"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Career Navigator</div>
+        <div class="logo-sub">AI-Powered Path Intelligence</div>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('setup')">Profile Setup</button>
+      <button class="nav-tab" onclick="showTab('paths')" id="tab-paths">Career Paths</button>
+      <button class="nav-tab" onclick="showTab('plan')" id="tab-plan">Learning Plan</button>
+      <button class="nav-tab" onclick="showTab('connections')" id="tab-connections">Connections</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- TAB: PROFILE SETUP -->
+    <div id="panel-setup">
+
+      <div class="section-label">Your Profile</div>
+
+      <!-- Resume Upload -->
+      <div class="upload-zone" id="upload-zone" onclick="simulateUpload()">
+        <div class="upload-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9,15 12,12 15,15"/></svg>
+        </div>
+        <div class="upload-title" id="upload-title">Upload your résumé</div>
+        <div class="upload-sub" id="upload-sub">PDF or DOCX · We'll extract your experience automatically</div>
+        <div class="file-badge" id="file-badge" style="display:none">resume.pdf</div>
+      </div>
+
+      <!-- Social Links -->
+      <div style="margin-top: 16px; margin-bottom: 4px;" class="section-label">Connect Accounts</div>
+      <div class="profile-grid" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:0;">
+
+        <div class="social-card" id="sc-linkedin" onclick="toggleSocial('linkedin')">
+          <div class="social-icon si-linkedin">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#0a66c2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </div>
+          <div>
+            <div class="social-name">LinkedIn</div>
+            <div class="social-status" id="st-linkedin">Not connected</div>
+          </div>
+          <button class="link-btn" id="btn-linkedin">Link</button>
+        </div>
+
+        <div class="social-card" id="sc-facebook" onclick="toggleSocial('facebook')">
+          <div class="social-icon si-facebook">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877f2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </div>
+          <div>
+            <div class="social-name">Facebook</div>
+            <div class="social-status" id="st-facebook">Not connected</div>
+          </div>
+          <button class="link-btn" id="btn-facebook">Link</button>
+        </div>
+
+        <div class="social-card" id="sc-instagram" onclick="toggleSocial('instagram')">
+          <div class="social-icon si-instagram">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#e1306c"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          </div>
+          <div>
+            <div class="social-name">Instagram</div>
+            <div class="social-status" id="st-instagram">Not connected</div>
+          </div>
+          <button class="link-btn" id="btn-instagram">Link</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- AI Insight strip -->
+      <div class="ai-strip" id="ai-strip" style="display:none">
+        <div class="ai-dot"></div>
+        <div class="ai-text" id="ai-strip-text"></div>
+      </div>
+
+      <!-- Role selection -->
+      <div class="section-label">Your Journey</div>
+      <div class="role-row">
+        <div class="role-select-wrap">
+          <div class="role-label">Current Role</div>
+          <select class="role-select" id="current-role" onchange="updateInsight()">
+            <option value="">-- Select or auto-detect --</option>
+            <option value="se">Software Engineer</option>
+            <option value="ai">AI Engineer</option>
+            <option value="sr">Senior AI Engineer</option>
+            <option value="staff">Staff Engineer</option>
+            <option value="pe">Principal Engineer</option>
+            <option value="ds">Data Scientist</option>
+            <option value="pm">Product Manager</option>
+          </select>
+        </div>
+        <div class="role-arrow">→</div>
+        <div class="role-select-wrap">
+          <div class="role-label">Dream Role</div>
+          <select class="role-select" id="target-role" onchange="updateInsight()">
+            <option value="">-- Your destination --</option>
+            <option value="cto">CTO</option>
+            <option value="vpe">VP Engineering</option>
+            <option value="staff">Staff Engineer</option>
+            <option value="pe">Principal Engineer</option>
+            <option value="cpo">Chief Product Officer</option>
+            <option value="founder">Founder / CEO</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="cta-btn" id="find-btn" onclick="findPath()" disabled>Find My Path →</button>
+    </div>
+
+    <!-- TAB: CAREER PATHS -->
+    <div id="panel-paths" style="display:none">
+      <div class="path-card">
+        <div class="recommended-badge">Recommended</div>
+        <div class="path-nodes">
+          <div class="path-node current">AI Engineer</div>
+          <div class="path-arrow">›</div>
+          <div class="path-node">Senior AI Engineer</div>
+          <div class="path-arrow">›</div>
+          <div class="path-node">Staff Engineer</div>
+          <div class="path-arrow">›</div>
+          <div class="path-node">Principal Engineer</div>
+          <div class="path-arrow">›</div>
+          <div class="path-node target">CTO</div>
+        </div>
+        <div class="path-meta">~144 months &nbsp;·&nbsp; 0.1% probability &nbsp;·&nbsp; 6 skill gaps</div>
+        <div class="path-desc">A technically-focused progression building deep engineering expertise before transitioning to executive leadership. The 12+ year timeline allows substantial skill development.</div>
+      </div>
+
+      <div class="advisor-card">
+        <div class="advisor-title">AI Career Advisor</div>
+        <div class="advisor-text">This path is recommended as it provides a solid technical foundation essential for a technical CTO role. Focus on the six critical skill gaps: system design, leadership, communication, mentoring, stakeholder management, and product strategy. Start building these early through cross-functional projects. The long timeline works in your favor — use it to gain diverse technical exposure across different domains.</div>
+      </div>
+    </div>
+
+    <!-- TAB: LEARNING PLAN -->
+    <div id="panel-plan" style="display:none">
+      <div class="plan-overview">
+        <div class="plan-ov-title">Plan Overview</div>
+        <div class="plan-ov-text">24-week comprehensive transition plan from AI Engineer to CTO — progressing through foundational leadership skills, advanced technical architecture, strategic communication, product strategy, and executive stakeholder management.</div>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-num">1</div>
+          <div class="timeline-card">
+            <div class="tl-title">Foundation Leadership Skills</div>
+            <div class="tl-tags"><span class="tl-tag">Leadership</span><span class="tl-tag">Communication</span><span class="tl-tag">Mentoring</span></div>
+            <div class="tl-course">📖 Engineering Management 101 (LinkedIn Learning)</div>
+            <div class="tl-milestone">Milestone: Complete foundational management concepts</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-num">2</div>
+          <div class="timeline-card">
+            <div class="tl-title">Technical Communication Mastery</div>
+            <div class="tl-tags"><span class="tl-tag">Communication</span><span class="tl-tag">Writing</span></div>
+            <div class="tl-course">📖 Technical Writing Fundamentals (Coursera)</div>
+            <div class="tl-milestone">Milestone: Clear technical communication for exec-level interactions</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-num">3</div>
+          <div class="timeline-card">
+            <div class="tl-title">System Design at Scale</div>
+            <div class="tl-tags"><span class="tl-tag">Architecture</span><span class="tl-tag">System Design</span></div>
+            <div class="tl-course">📖 Designing Data-Intensive Applications (O'Reilly)</div>
+            <div class="tl-milestone">Milestone: Lead a system design review for your team</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-num">4</div>
+          <div class="timeline-card">
+            <div class="tl-title">Stakeholder & Executive Influence</div>
+            <div class="tl-tags"><span class="tl-tag">Stakeholder Mgmt</span><span class="tl-tag">Strategy</span></div>
+            <div class="tl-course">📖 Executive Presence (Harvard Online)</div>
+            <div class="tl-milestone">Milestone: Present a business case to senior leadership</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONNECTIONS -->
+    <div id="panel-connections" style="display:none">
+      <div class="section-label">People on similar paths</div>
+      <div class="conn-grid">
+        <div class="conn-card">
+          <div class="conn-avatar">JK</div>
+          <div class="conn-name">Jamie Kim</div>
+          <div class="conn-role">Staff Engineer → VP Eng</div>
+          <div class="conn-badge">2 years ahead</div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-avatar">AR</div>
+          <div class="conn-name">Alex Rivera</div>
+          <div class="conn-role">AI Eng → Principal</div>
+          <div class="conn-badge">Same stage</div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-avatar">SP</div>
+          <div class="conn-name">Sofia Patel</div>
+          <div class="conn-role">Principal → CTO</div>
+          <div class="conn-badge">5 years ahead</div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-avatar">ML</div>
+          <div class="conn-name">Marcus Lee</div>
+          <div class="conn-role">Senior AI → Staff</div>
+          <div class="conn-badge">1 year ahead</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">Powered by Neo4j Graph Database · RocketRide AI Pipelines</div>
+</div>
+
+<script>
+  var hasResume = false;
+  var linked = {};
+
+  function showTab(name) {
+    ['setup','paths','plan','connections'].forEach(function(t) {
+      document.getElementById('panel-' + t).style.display = 'none';
+      var tab = document.querySelector('[onclick="showTab(\'' + t + '\')"]');
+      if(tab) tab.classList.remove('active');
+    });
+    document.getElementById('panel-' + name).style.display = 'block';
+    var activeTab = document.querySelector('[onclick="showTab(\'' + name + '\')"]');
+    if(activeTab) activeTab.classList.add('active');
+  }
+
+  function simulateUpload() {
+    hasResume = true;
+    document.getElementById('upload-zone').classList.add('has-file');
+    document.getElementById('upload-title').textContent = 'résumé uploaded';
+    document.getElementById('upload-sub').textContent = 'AI Engineer · 3 yrs experience · Python, ML, Cloud';
+    document.getElementById('file-badge').style.display = 'inline-block';
+    var sel = document.getElementById('current-role');
+    sel.value = 'ai';
+    updateInsight();
+    checkReady();
+  }
+
+  function toggleSocial(name) {
+    linked[name] = !linked[name];
+    var card = document.getElementById('sc-' + name);
+    var status = document.getElementById('st-' + name);
+    var btn = document.getElementById('btn-' + name);
+    if(linked[name]) {
+      card.classList.add('linked');
+      status.textContent = 'Connected';
+      btn.textContent = 'Linked ✓';
+      btn.classList.add('linked-btn');
+    } else {
+      card.classList.remove('linked');
+      status.textContent = 'Not connected';
+      btn.textContent = 'Link';
+      btn.classList.remove('linked-btn');
+    }
+    updateInsight();
+  }
+
+  function updateInsight() {
+    var strip = document.getElementById('ai-strip');
+    var text = document.getElementById('ai-strip-text');
+    var sources = [];
+    if(hasResume) sources.push('<strong>résumé</strong>');
+    if(linked.linkedin) sources.push('<strong>LinkedIn</strong>');
+    if(linked.facebook) sources.push('<strong>Facebook</strong>');
+    if(linked.instagram) sources.push('<strong>Instagram</strong>');
+    var cur = document.getElementById('current-role').value;
+    var tgt = document.getElementById('target-role').value;
+    if(sources.length > 0 || cur) {
+      strip.style.display = 'flex';
+      var msg = 'AI detected: ';
+      if(cur === 'ai') msg += 'AI Engineer with 3 years experience, Python & ML skills. ';
+      else if(cur) msg += 'Profile analyzed from your inputs. ';
+      if(sources.length) msg += 'Cross-referencing ' + sources.join(', ') + ' for deeper career signals.';
+      text.innerHTML = msg;
+    } else {
+      strip.style.display = 'none';
+    }
+    checkReady();
+  }
+
+  function checkReady() {
+    var cur = document.getElementById('current-role').value;
+    var tgt = document.getElementById('target-role').value;
+    document.getElementById('find-btn').disabled = !(cur && tgt);
+  }
+
+  function findPath() {
+    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.getElementById('tab-paths').classList.add('active');
+    showTab('paths');
+  }
+</script>

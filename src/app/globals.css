@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --background: #0f172a;
-  --foreground: #e2e8f0;
+  --background: #0d1021;
+  --foreground: #e8e9f3;
 }
 
 @theme inline {
@@ -13,28 +14,193 @@
 }
 
 body {
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  background: #0d1021;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Sora', sans-serif;
   min-height: 100vh;
 }
 
-.tab-active {
-  border-bottom: 2px solid #818cf8;
-  color: #818cf8;
+/* Nav tabs */
+.nav-tab {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: none;
+}
+.nav-tab.active {
+  color: #a78bfa;
+  border-bottom-color: #7c3aed;
+  font-weight: 500;
+}
+.nav-tab:hover:not(.active) {
+  color: #9ca3af;
 }
 
-.path-node {
+/* Section labels */
+.section-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: #4c4f6b;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* Upload zone */
+.upload-zone {
+  border: 1.5px dashed rgba(120, 100, 255, 0.3);
+  border-radius: 12px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(124, 58, 237, 0.04);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.upload-zone:hover {
+  border-color: rgba(120, 100, 255, 0.6);
+  background: rgba(124, 58, 237, 0.08);
+}
+.upload-zone.has-file {
+  border-style: solid;
+  border-color: rgba(120, 100, 255, 0.4);
+}
+
+/* Social cards */
+.social-card {
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.02);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.social-card:hover {
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+}
+.social-card.linked {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.04);
+}
+
+/* AI insight strip */
+.ai-strip {
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: rgba(124, 58, 237, 0.06);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* Role selectors */
+.role-select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: #e8e9f3;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.role-select:focus {
+  outline: none;
+  border-color: rgba(124, 58, 237, 0.5);
+}
+
+/* Path cards */
+.path-card {
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.02);
+}
+.path-card.recommended {
+  border-color: rgba(255, 165, 0, 0.25);
+  background: rgba(255, 165, 0, 0.03);
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 40px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(124,58,237,0.2);
+}
+
+/* Connection cards */
+.conn-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* CTA button */
+.cta-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  color: white;
+  font-family: 'Sora', sans-serif;
+  letter-spacing: 0.3px;
+  transition: opacity 0.2s;
+}
+.cta-btn:hover { opacity: 0.9; }
+.cta-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* Animations */
+.fade-in {
   animation: fadeIn 0.3s ease-in-out both;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Footer */
+.app-footer {
+  text-align: center;
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  font-size: 10px;
+  color: #2d2f45;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
 }
