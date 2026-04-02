@@ -1,0 +1,47 @@
+{
+  "name": "Learning Plan Generator",
+  "description": "Generates a personalized week-by-week learning plan based on skill gaps and available courses from the career graph",
+  "nodes": [
+    {
+      "id": "webhook_input",
+      "type": "source/webhook",
+      "config": {
+        "path": "/learning-plan",
+        "method": "POST"
+      },
+      "position": { "x": 0, "y": 200 }
+    },
+    {
+      "id": "extract_data",
+      "type": "transform/json-extract",
+      "config": {
+        "fields": ["skillGaps", "prerequisites", "courses", "timeframeMonths", "currentRole", "targetRole"]
+      },
+      "position": { "x": 200, "y": 200 }
+    },
+    {
+      "id": "sequence_skills",
+      "type": "llm/anthropic",
+      "config": {
+        "model": "claude-sonnet-4-20250514",
+        "system_prompt": "You are a learning curriculum designer specializing in tech career transitions. Given skill gaps with their prerequisites, available courses, and a timeframe, create an optimally sequenced learning plan.\n\nRules:\n1. Prerequisites must come before dependent skills\n2. Group related skills in the same week when possible\n3. Include specific courses from the provided list\n4. Set realistic weekly time commitments (10-15 hours/week)\n5. Include practical milestones (projects, certifications, portfolio items)\n6. Front-load high-importance skills\n\nRespond in JSON format:\n{\n  \"plan\": [{\n    \"week\": 1,\n    \"focus\": \"Week theme\",\n    \"skills\": [\"skill1\", \"skill2\"],\n    \"courses\": [{\"name\": \"...\", \"provider\": \"...\"}],\n    \"hours\": 12,\n    \"milestone\": \"What you should be able to do\"\n  }],\n  \"summary\": \"Overall plan description\",\n  \"total_weeks\": 24,\n  \"key_milestones\": [\"...\"],\n  \"estimated_readiness\": \"How ready you'll be for the target role\"\n}",
+        "temperature": 0.4,
+        "max_tokens": 3000
+      },
+      "position": { "x": 400, "y": 200 }
+    },
+    {
+      "id": "output",
+      "type": "output/webhook-response",
+      "config": {
+        "content_type": "application/json"
+      },
+      "position": { "x": 600, "y": 200 }
+    }
+  ],
+  "edges": [
+    { "from": "webhook_input", "to": "extract_data", "output": "default", "input": "default" },
+    { "from": "extract_data", "to": "sequence_skills", "output": "default", "input": "default" },
+    { "from": "sequence_skills", "to": "output", "output": "default", "input": "default" }
+  ]
+}

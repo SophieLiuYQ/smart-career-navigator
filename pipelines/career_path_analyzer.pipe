@@ -1,0 +1,47 @@
+{
+  "name": "Career Path Analyzer",
+  "description": "Analyzes career transition paths from Neo4j graph data and provides AI-powered recommendations",
+  "nodes": [
+    {
+      "id": "webhook_input",
+      "type": "source/webhook",
+      "config": {
+        "path": "/career-analyze",
+        "method": "POST"
+      },
+      "position": { "x": 0, "y": 200 }
+    },
+    {
+      "id": "extract_paths",
+      "type": "transform/json-extract",
+      "config": {
+        "fields": ["paths", "currentRole", "targetRole", "skillGaps"]
+      },
+      "position": { "x": 200, "y": 200 }
+    },
+    {
+      "id": "analyze_paths",
+      "type": "llm/anthropic",
+      "config": {
+        "model": "claude-sonnet-4-20250514",
+        "system_prompt": "You are a senior career advisor with deep knowledge of the tech industry. You analyze career transition paths derived from a professional network graph database.\n\nGiven career paths with transition probabilities and timeframes, provide:\n1. Assessment of each path (strengths, challenges, market demand)\n2. A clear recommendation with reasoning\n3. Risk factors and mitigation strategies\n4. Salary progression expectations\n\nBe specific, data-driven, and actionable. Reference the actual roles and transitions in your analysis.\n\nRespond in JSON format:\n{\n  \"paths\": [{\n    \"roles\": [\"...\"],\n    \"assessment\": \"...\",\n    \"strengths\": [\"...\"],\n    \"challenges\": [\"...\"],\n    \"recommended\": boolean\n  }],\n  \"overall_advice\": \"...\",\n  \"market_insight\": \"...\"\n}",
+        "temperature": 0.3,
+        "max_tokens": 2048
+      },
+      "position": { "x": 400, "y": 200 }
+    },
+    {
+      "id": "output",
+      "type": "output/webhook-response",
+      "config": {
+        "content_type": "application/json"
+      },
+      "position": { "x": 600, "y": 200 }
+    }
+  ],
+  "edges": [
+    { "from": "webhook_input", "to": "extract_paths", "output": "default", "input": "default" },
+    { "from": "extract_paths", "to": "analyze_paths", "output": "default", "input": "default" },
+    { "from": "analyze_paths", "to": "output", "output": "default", "input": "default" }
+  ]
+}
