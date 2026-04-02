@@ -21,6 +21,15 @@ interface SocialState {
   instagram: boolean;
 }
 
+interface ResumeData {
+  name?: string;
+  current_role?: string;
+  years_experience?: number;
+  skills?: string[];
+  experience?: Array<{ title: string; company: string; duration: string }>;
+  summary?: string;
+}
+
 export default function Home() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [currentRole, setCurrentRole] = useState("");
@@ -30,6 +39,8 @@ export default function Home() {
 
   // Profile state
   const [resumeFile, setResumeFile] = useState<string | null>(null);
+  const [resumeParsing, setResumeParsing] = useState(false);
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [social, setSocial] = useState<SocialState>({ linkedin: false, facebook: false, instagram: false });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,14 +60,46 @@ export default function Home() {
       .catch(() => setError("Failed to load roles. Is Neo4j running?"));
   }, []);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setResumeFile(file.name);
+    if (!file) return;
+
+    setResumeFile(file.name);
+    setResumeParsing(true);
+    setResumeData(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload-resume", { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      setResumeData(data);
+
+      // Auto-fill current role if we find a match
+      if (data.current_role && roles.length > 0) {
+        const match = roles.find((r) =>
+          r.title.toLowerCase().includes(data.current_role.toLowerCase()) ||
+          data.current_role.toLowerCase().includes(r.title.toLowerCase())
+        );
+        if (match) setCurrentRole(match.title);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to parse resume");
+    } finally {
+      setResumeParsing(false);
     }
   };
 
-  const toggleSocial = (platform: keyof SocialState) => {
+  const toggleSocial = async (platform: keyof SocialState) => {
+    // LinkedIn uses OAuth via NextAuth
+    if (platform === "linkedin" && !social.linkedin) {
+      const { signIn } = await import("next-auth/react");
+      signIn("linkedin", { redirect: false });
+      return;
+    }
     setSocial((prev) => ({ ...prev, [platform]: !prev[platform] }));
   };
 
@@ -66,12 +109,20 @@ export default function Home() {
     if (social.linkedin) sources.push("LinkedIn");
     if (social.facebook) sources.push("Facebook");
     if (social.instagram) sources.push("Instagram");
-    if (sources.length === 0 && !currentRole) return null;
+    if (sources.length === 0 && !currentRole && !resumeData) return null;
+
+    if (resumeParsing) return "Analyzing your resume with AI...";
 
     let msg = "";
-    if (resumeFile) msg += `Analyzed ${resumeFile}. `;
-    if (currentRole) msg += `Current: ${currentRole}. `;
-    if (sources.length > 0) msg += `Cross-referencing ${sources.join(", ")} for deeper career signals.`;
+    if (resumeData) {
+      msg += `AI detected: ${resumeData.current_role || "role"} with ${resumeData.years_experience || "?"} years experience. `;
+      if (resumeData.skills && resumeData.skills.length > 0) {
+        msg += `Skills: ${resumeData.skills.slice(0, 6).join(", ")}. `;
+      }
+    } else if (currentRole) {
+      msg += `Current: ${currentRole}. `;
+    }
+    if (sources.length > 1) msg += `Cross-referencing ${sources.join(", ")} for deeper career signals.`;
     return msg;
   };
 
@@ -100,7 +151,8 @@ export default function Home() {
 
     const fetchSkillGaps = async (): Promise<SkillGap[]> => {
       try {
-        const res = await fetch("/api/skill-gap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentRole, targetRole, userSkills: [] }) });
+        const userSkills = resumeData?.skills || [];
+        const res = await fetch("/api/skill-gap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentRole, targetRole, userSkills }) });
         return await res.json();
       } catch { return []; }
     };
@@ -195,10 +247,30 @@ export default function Home() {
                   <polyline points="9,15 12,12 15,15" />
                 </svg>
               </div>
-              {resumeFile ? (
+              {resumeParsing ? (
+                <>
+                  <div className="text-[13px] font-medium text-purple-300">Analyzing resume...</div>
+                  <svg className="animate-spin h-5 w-5 text-purple-400" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                </>
+              ) : resumeData ? (
+                <>
+                  <div className="text-[13px] font-medium text-purple-300">
+                    {resumeData.name || "Resume"} — {resumeData.current_role || "Parsed"}
+                  </div>
+                  <div className="text-[11px] text-gray-500">
+                    {resumeData.years_experience ? `${resumeData.years_experience} yrs experience` : ""}
+                    {resumeData.skills ? ` · ${resumeData.skills.slice(0, 5).join(", ")}` : ""}
+                  </div>
+                  <div className="px-2.5 py-1 rounded-md text-[11px] font-mono text-purple-400" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}>
+                    {resumeFile}
+                  </div>
+                </>
+              ) : resumeFile ? (
                 <>
                   <div className="text-[13px] font-medium text-purple-300">Resume uploaded</div>
-                  <div className="text-[11px] text-gray-600">AI will extract your experience automatically</div>
                   <div className="px-2.5 py-1 rounded-md text-[11px] font-mono text-purple-400" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}>
                     {resumeFile}
                   </div>
