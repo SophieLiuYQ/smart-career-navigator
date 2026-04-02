@@ -1,21 +1,34 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import LinkedIn from "next-auth/providers/linkedin";
 import Facebook from "next-auth/providers/facebook";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  debug: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-    LinkedIn({
+    {
+      id: "linkedin",
+      name: "LinkedIn",
+      type: "oidc",
+      issuer: "https://www.linkedin.com/oauth",
       clientId: process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
       authorization: {
         params: { scope: "openid profile email" },
       },
-    }),
+      checks: ["state"],
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        };
+      },
+    },
     Facebook({
       clientId: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
@@ -23,7 +36,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, account }) {
-      // Store which provider was used
       if (account) {
         token.provider = account.provider;
         if (!token.providers) token.providers = [];
@@ -37,7 +49,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }
-      // Pass provider info to client
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (session as any).provider = token.provider;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
