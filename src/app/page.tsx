@@ -6,6 +6,7 @@ import LearningPlanView from "@/components/LearningPlanView";
 import ConnectionsView from "@/components/ConnectionsView";
 import GraphVisualization from "@/components/GraphVisualization";
 import RoleInsightsView from "@/components/RoleInsightsView";
+import CommunityStoriesView from "@/components/CommunityStoriesView";
 import RoleCombobox from "@/components/RoleCombobox";
 import type {
   Role,
@@ -15,7 +16,7 @@ import type {
   SkillGap,
 } from "@/types";
 
-type Tab = "setup" | "paths" | "learning" | "connections" | "insights";
+type Tab = "setup" | "paths" | "learning" | "connections" | "community" | "insights";
 
 interface SocialState {
   linkedin: boolean;
@@ -58,6 +59,9 @@ export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [insightsData, setInsightsData] = useState<any>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [communityData, setCommunityData] = useState<any>(null);
+  const [communityLoading, setCommunityLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -184,6 +188,7 @@ export default function Home() {
     setLearningData(null);
     setConnectionsData(null);
     setInsightsData(null);
+    setCommunityData(null);
     setActiveTab("paths");
 
     const fetchPaths = async () => {
@@ -241,8 +246,19 @@ export default function Home() {
       finally { setInsightsLoading(false); }
     };
 
+    const fetchCommunity = async () => {
+      setCommunityLoading(true);
+      try {
+        const res = await fetch("/api/community-stories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentRole, targetRole }) });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        setCommunityData(data);
+      } catch { console.error("Failed to fetch community stories"); }
+      finally { setCommunityLoading(false); }
+    };
+
     try {
-      const [, skillGaps] = await Promise.all([fetchPaths(), fetchSkillGaps(), fetchInsights()]);
+      const [, skillGaps] = await Promise.all([fetchPaths(), fetchSkillGaps(), fetchInsights(), fetchCommunity()]);
       await Promise.all([fetchLearning(skillGaps), fetchConnections()]);
     } finally { setLoading(false); }
   }, [currentRole, targetRole]);
@@ -252,6 +268,7 @@ export default function Home() {
     { key: "paths", label: "Career Paths" },
     { key: "learning", label: "Learning Plan" },
     { key: "connections", label: "Connections" },
+    { key: "community", label: "Community" },
     { key: "insights", label: "Role Insights" },
   ];
 
@@ -451,6 +468,16 @@ export default function Home() {
             {connectionsData && <SourceBadge source={connectionsData._source} />}
             {!connectionsLoading && !connectionsData && (
               <EmptyState text="Connection recommendations will appear here after analysis." />
+            )}
+          </div>
+        )}
+
+        {activeTab === "community" && (
+          <div className="fade-in">
+            {communityLoading && <Spinner />}
+            {communityData && <CommunityStoriesView data={communityData} />}
+            {!communityLoading && !communityData && (
+              <EmptyState text="Community stories and discussions will appear here after analysis." />
             )}
           </div>
         )}
