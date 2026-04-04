@@ -344,8 +344,17 @@ export default function Home() {
                     {resumeData.years_experience ? `${resumeData.years_experience} yrs experience` : ""}
                     {resumeData.skills ? ` · ${resumeData.skills.slice(0, 5).join(", ")}` : ""}
                   </div>
-                  <div className="px-2.5 py-1 rounded-md text-[13px] font-mono text-purple-400" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}>
-                    {resumeFile}
+                  <div className="flex items-center gap-2">
+                    <div className="px-2.5 py-1 rounded-md text-[13px] font-mono text-purple-400" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}>
+                      {resumeFile}
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setResumeFile(null); setResumeData(null); setCurrentRole(""); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="px-2.5 py-1 rounded-md text-[13px] text-red-400 hover:text-red-300 transition-colors"
+                      style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}
+                    >
+                      Remove
+                    </button>
                   </div>
                 </>
               ) : resumeFile ? (
