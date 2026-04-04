@@ -110,9 +110,10 @@ export async function POST(request: Request) {
     } else {
       // Fallback: Direct Anthropic call
       console.log("[learning-plan] ⚠️ RocketRide unavailable, falling back to Anthropic");
-      const systemPrompt = `You are a career learning plan architect. Given skill gaps, their prerequisites, available courses, and a timeframe, create a detailed week-by-week learning plan.
-Consider prerequisite ordering — learn foundational skills before advanced ones.
-Respond ONLY with valid JSON, no markdown: { "plan": [{ "week": 1, "focus": "...", "skills": [...], "courses": [{"name": "...", "provider": "..."}], "milestone": "..." }], "summary": "..." }`;
+      const systemPrompt = `You are a career learning plan architect. Create a detailed week-by-week learning plan with REAL resource links.
+Include REAL URLs to: Coursera courses, YouTube videos/channels, books (Amazon links), Udemy courses, free tutorials, official documentation.
+Every resource MUST have an actual working URL.
+Respond ONLY with valid JSON, no markdown: { "plan": [{ "week": 1, "focus": "...", "skills": [...], "resources": [{"name": "...", "type": "course|video|book|tutorial|docs", "provider": "...", "url": "https://..."}], "milestone": "..." }], "summary": "..." }`;
 
       const userMessage = `Create a learning plan for transitioning from ${currentRole} to ${targetRole} within ${timeframeMonths} months.
 
