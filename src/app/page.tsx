@@ -97,19 +97,24 @@ export default function Home() {
 
       setResumeData(data);
 
-      // Auto-fill current role — try suggested_match first, then fuzzy match
-      if (roles.length > 0) {
-        const suggested = data.suggested_match || data.current_role || "";
-        const match = roles.find((r) => r.title.toLowerCase() === suggested.toLowerCase())
-          || roles.find((r) =>
-            r.title.toLowerCase().includes(suggested.toLowerCase()) ||
-            suggested.toLowerCase().includes(r.title.toLowerCase())
-          )
-          || roles.find((r) =>
-            r.title.toLowerCase().includes((data.current_role || "").toLowerCase()) ||
-            (data.current_role || "").toLowerCase().includes(r.title.toLowerCase())
-          );
-        if (match) setCurrentRole(match.title);
+      // Auto-fill current role using skill-based matching
+      if (data.skills && data.skills.length > 0) {
+        try {
+          const matchRes = await fetch("/api/match-role", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ skills: data.skills, currentTitle: data.current_role }),
+          });
+          const matchData = await matchRes.json();
+          if (matchData.bestMatch) {
+            setCurrentRole(matchData.bestMatch);
+          }
+        } catch {
+          // Fallback: use the parsed title directly
+          if (data.current_role) setCurrentRole(data.current_role);
+        }
+      } else if (data.current_role) {
+        setCurrentRole(data.current_role);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to parse resume");
