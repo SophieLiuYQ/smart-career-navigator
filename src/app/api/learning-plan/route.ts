@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { generateCompletion } from "@/lib/anthropic";
 import { generateLearningPlan } from "@/lib/rocketride";
+import { validateResources } from "@/lib/link-validator";
 
 interface SkillGapInput {
   skill: string;
@@ -139,6 +140,17 @@ Available courses: ${JSON.stringify(courses)}`;
           learningPlan = { plan: [], summary: aiPlanRaw };
         }
       }
+    }
+
+    // Validate all resource links before returning
+    if (learningPlan?.plan && Array.isArray(learningPlan.plan)) {
+      const validationPromises = learningPlan.plan.map(async (week: { resources?: Array<{ name: string; type?: string; provider?: string; url?: string }> }) => {
+        if (week.resources && Array.isArray(week.resources)) {
+          week.resources = await validateResources(week.resources);
+        }
+        return week;
+      });
+      learningPlan.plan = await Promise.all(validationPromises);
     }
 
     return NextResponse.json({
