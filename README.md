@@ -8,13 +8,13 @@ Upload your resume, connect your LinkedIn, and discover realistic career paths t
 
 ---
 
-## Demo Videos
+## Demo
 
 ### Resume Upload & AI Parsing
-https://github.com/SophieLiuYQ/smart-career-navigator/raw/main/demo/demo_resume.mp4
+![Resume Demo](demo/demo_resume.gif)
 
 ### Career Path Search & Analysis
-https://github.com/SophieLiuYQ/smart-career-navigator/raw/main/demo/demo_search.mp4
+![Search Demo](demo/demo_search.gif)
 
 ---
 
