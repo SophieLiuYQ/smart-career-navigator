@@ -1,6 +1,6 @@
 # Smart Career Navigator
 
-## HackwithChicago 3.0 
+**partnered with Shakarr Wiggins, Ph.D.in HackwithChicago 3.0**
 
 **AI-Powered Career Path Intelligence** built with **Neo4j**, **RocketRide AI** (Hackathon requirements), and **Anthropic Claude**.
 
@@ -9,50 +9,25 @@ Search or type in your role, upload your resume, and discover realistic career p
 **Website:** [smart-career-navigator.vercel.app](https://smart-career-navigator.vercel.app)
 
 ---
-
-## Demo
-
-### Resume Upload & AI Parsing
-![Resume Demo](demo/demo_resume.gif)
-
 ### Career Path Search & Analysis
 ![Search Demo](demo/demo_search.gif)
 
+### Resume Upload & AI Parsing
+![Resume Demo](demo/demo_resume.gif)
 ---
 
 ## Features
 
-### Profile Setup
 - **Resume Upload** -- Upload PDF/DOCX, Claude AI extracts skills, experience, and current role
-- **Skill-Based Role Matching** -- Neo4j finds the best-fit role based on your actual skills, not job title
-- **LinkedIn OAuth** -- Connect your LinkedIn profile for richer career context
-- **AI Insight Strip** -- Real-time summary of detected profile data
-
-### Career Paths (Skill-First Pathfinding)
-- **AI-Generated Realistic Paths** -- Not random database traversals. AI generates paths based on how real people transition careers
+- **Skill-Based Role Matching** -- Neo4j finds the best-fit role based on your skills
 - **Skill Gap Analysis** -- Neo4j graph queries identify exactly which skills you need
-- **Self-Expanding Graph** -- New roles are automatically created in Neo4j when users search for them
 - **D3 Force-Directed Graph** -- Interactive visualization of career path networks
-
-### Learning Plan
 - **Week-by-Week Curriculum** -- AI-generated learning timeline with prerequisite ordering
-- **Real Resource Links** -- Clickable links to Coursera, YouTube, Amazon, Udemy, and official docs
-- **Link Validation** -- Every URL is verified; broken links replaced with working search pages
-- **Powered by RocketRide Pipeline** -- Learning plan logic defined in portable `.pipe` files
-
-### Role Insights (O*NET Integration)
+- **Real Resource Links** -- Links to Coursera, YouTube, Amazon, Udemy, and official docs
 - **Salary & Growth Data** -- Real labor market data from O*NET
-- **Skill Gap Visualization** -- Progress bars showing which skills you have vs. need
-- **In-Demand Technologies** -- Hot tech for your target role
+- **Skill Gap Visualization** -- Progress bars showing which skills you have versus you need
 - **Related Roles** -- Alternative career paths to consider
-
-### Community
 - **Real Reddit Discussions** -- Live search of Reddit for career transition stories
-- **AI-Curated Relevance** -- Claude filters and summarizes the most useful posts
-- **Subreddit Links** -- Direct links to r/careerguidance, r/cscareerquestions, r/careerchange
-
-### Connections
-- **Graph-Based Networking** -- Neo4j finds people who made similar career transitions
 - **AI Outreach Strategies** -- Personalized connection advice and conversation starters
 
 ---
