@@ -1,6 +1,6 @@
 # Smart Career Navigator
 
-**partnered with Shakarr Wiggins, Ph.D.in HackwithChicago 3.0**
+**Partnered with Shakarr Wiggins, Ph.D.in HackwithChicago 3.0**
 
 **AI-Powered Career Path Intelligence** built with **Neo4j**, **RocketRide AI** (Hackathon requirements), and **Anthropic Claude**.
 
@@ -23,11 +23,11 @@ Search or type in your role, upload your resume, and discover realistic career p
 - **Skill Gap Analysis** -- Neo4j graph queries identify exactly which skills you need
 - **D3 Force-Directed Graph** -- Interactive visualization of career path networks
 - **Week-by-Week Curriculum** -- AI-generated learning timeline with prerequisite ordering
-- **Real Resource Links** -- Links to Coursera, YouTube, Amazon, Udemy, and official docs
+- **Resource Links** -- Links to Coursera, YouTube, Amazon, Udemy, and official docs
 - **Salary & Growth Data** -- Real labor market data from O*NET
 - **Skill Gap Visualization** -- Progress bars showing which skills you have versus you need
 - **Related Roles** -- Alternative career paths to consider
-- **Real Reddit Discussions** -- Live search of Reddit for career transition stories
+- **Reddit Discussions** -- Live search of Reddit for career transition stories
 - **AI Outreach Strategies** -- Personalized connection advice and conversation starters
 
 ---
@@ -68,22 +68,6 @@ Search or type in your role, upload your resume, and discover realistic career p
 - Connection outreach strategy generation
 
 ---
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 16, React, TypeScript, Tailwind CSS, D3.js |
-| Backend | Next.js API Routes (serverless) |
-| Database | Neo4j Aura (graph database) |
-| AI Pipelines | RocketRide AI (.pipe definitions) |
-| LLM | Anthropic Claude (Sonnet) |
-| Auth | NextAuth.js v5 (LinkedIn OAuth) |
-| External Data | O*NET (labor market), Reddit API (community) |
-| Deployment | Vercel (app), Neo4j Aura (database) |
-
----
-
 ## Getting Started
 
 ### Prerequisites
