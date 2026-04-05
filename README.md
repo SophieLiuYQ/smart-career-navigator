@@ -1,10 +1,12 @@
 # Smart Career Navigator
 
-**AI-Powered Career Path Intelligence** built with **Neo4j**, **RocketRide AI**, and **Anthropic Claude**.
+## HackwithChicago 3.0 
 
-Upload your resume, connect your LinkedIn, and discover realistic career paths to your dream role -- powered by graph-based skill matching and AI analysis.
+**AI-Powered Career Path Intelligence** built with **Neo4j**, **RocketRide AI** (Hackathon requirements), and **Anthropic Claude**.
 
-**Live Demo:** [smart-career-navigator.vercel.app](https://smart-career-navigator.vercel.app)
+Search or type in your role, upload your resume, and discover realistic career paths to your dream role -- powered by graph-based skill matching and AI analysis.
+
+**Website:** [smart-career-navigator.vercel.app](https://smart-career-navigator.vercel.app)
 
 ---
 
