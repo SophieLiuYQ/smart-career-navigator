@@ -50,14 +50,12 @@ Search or type in your role, upload your resume, and discover realistic career p
 ```
 
 ### Neo4j (Graph Database)
-- 50+ roles, 98+ skills, 100+ career transitions, 30+ people profiles
 - Self-expanding: new roles created automatically via AI
 - Cypher queries for pathfinding, skill matching, and connection discovery
 - Skill-based role matching for resume uploads
 
 ### RocketRide AI (Pipeline Engine)
 - 4 pipeline definitions (`.pipe` files) that define AI workflow logic
-- Internal engine reads pipeline configs and executes them
 - Each pipeline: webhook source -> data transform -> LLM node -> output
 - Pipelines: career analysis, learning plans, connections, O*NET insights
 
