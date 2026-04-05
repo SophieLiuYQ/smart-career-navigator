@@ -1,36 +1,203 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart Career Navigator
+
+**AI-Powered Career Path Intelligence** built with **Neo4j**, **RocketRide AI**, and **Anthropic Claude**.
+
+Upload your resume, connect your LinkedIn, and discover realistic career paths to your dream role -- powered by graph-based skill matching and AI analysis.
+
+**Live Demo:** [smart-career-navigator.vercel.app](https://smart-career-navigator.vercel.app)
+
+---
+
+## Demo Videos
+
+### Resume Upload & AI Parsing
+https://github.com/SophieLiuYQ/smart-career-navigator/raw/main/demo/demo_resume.mp4
+
+### Career Path Search & Analysis
+https://github.com/SophieLiuYQ/smart-career-navigator/raw/main/demo/demo_search.mp4
+
+---
+
+## Features
+
+### Profile Setup
+- **Resume Upload** -- Upload PDF/DOCX, Claude AI extracts skills, experience, and current role
+- **Skill-Based Role Matching** -- Neo4j finds the best-fit role based on your actual skills, not job title
+- **LinkedIn OAuth** -- Connect your LinkedIn profile for richer career context
+- **AI Insight Strip** -- Real-time summary of detected profile data
+
+### Career Paths (Skill-First Pathfinding)
+- **AI-Generated Realistic Paths** -- Not random database traversals. AI generates paths based on how real people transition careers
+- **Skill Gap Analysis** -- Neo4j graph queries identify exactly which skills you need
+- **Self-Expanding Graph** -- New roles are automatically created in Neo4j when users search for them
+- **D3 Force-Directed Graph** -- Interactive visualization of career path networks
+
+### Learning Plan
+- **Week-by-Week Curriculum** -- AI-generated learning timeline with prerequisite ordering
+- **Real Resource Links** -- Clickable links to Coursera, YouTube, Amazon, Udemy, and official docs
+- **Link Validation** -- Every URL is verified; broken links replaced with working search pages
+- **Powered by RocketRide Pipeline** -- Learning plan logic defined in portable `.pipe` files
+
+### Role Insights (O*NET Integration)
+- **Salary & Growth Data** -- Real labor market data from O*NET
+- **Skill Gap Visualization** -- Progress bars showing which skills you have vs. need
+- **In-Demand Technologies** -- Hot tech for your target role
+- **Related Roles** -- Alternative career paths to consider
+
+### Community
+- **Real Reddit Discussions** -- Live search of Reddit for career transition stories
+- **AI-Curated Relevance** -- Claude filters and summarizes the most useful posts
+- **Subreddit Links** -- Direct links to r/careerguidance, r/cscareerquestions, r/careerchange
+
+### Connections
+- **Graph-Based Networking** -- Neo4j finds people who made similar career transitions
+- **AI Outreach Strategies** -- Personalized connection advice and conversation starters
+
+---
+
+## Architecture
+
+```
+                    +------------------+
+                    |   Next.js App    |
+                    |   (Vercel)       |
+                    +--------+---------+
+                             |
+              +--------------+--------------+
+              |              |              |
+     +--------v---+  +------v------+  +----v--------+
+     |   Neo4j    |  | RocketRide  |  |  Anthropic  |
+     |   Aura     |  |  Pipelines  |  |   Claude    |
+     | (Graph DB) |  | (.pipe files)|  |   (AI)     |
+     +------------+  +-------------+  +-------------+
+```
+
+### Neo4j (Graph Database)
+- 50+ roles, 98+ skills, 100+ career transitions, 30+ people profiles
+- Self-expanding: new roles created automatically via AI
+- Cypher queries for pathfinding, skill matching, and connection discovery
+- Skill-based role matching for resume uploads
+
+### RocketRide AI (Pipeline Engine)
+- 4 pipeline definitions (`.pipe` files) that define AI workflow logic
+- Internal engine reads pipeline configs and executes them
+- Each pipeline: webhook source -> data transform -> LLM node -> output
+- Pipelines: career analysis, learning plans, connections, O*NET insights
+
+### Anthropic Claude
+- Resume parsing (reads PDFs directly via Claude's document understanding)
+- Career path generation and analysis
+- Learning curriculum design with real resource links
+- Connection outreach strategy generation
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 16, React, TypeScript, Tailwind CSS, D3.js |
+| Backend | Next.js API Routes (serverless) |
+| Database | Neo4j Aura (graph database) |
+| AI Pipelines | RocketRide AI (.pipe definitions) |
+| LLM | Anthropic Claude (Sonnet) |
+| Auth | NextAuth.js v5 (LinkedIn OAuth) |
+| External Data | O*NET (labor market), Reddit API (community) |
+| Deployment | Vercel (app), Neo4j Aura (database) |
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 20+
+- Neo4j (local via Homebrew or Neo4j Aura cloud)
+- Anthropic API key
+
+### Setup
 
 ```bash
+# Clone the repo
+git clone https://github.com/SophieLiuYQ/smart-career-navigator.git
+cd smart-career-navigator
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.local.example .env.local
+# Edit .env.local with your credentials:
+#   NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD
+#   ANTHROPIC_API_KEY
+#   AUTH_SECRET (generate with: openssl rand -base64 32)
+
+# Seed the database
+npx tsx scripts/seed.ts
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description |
+|----------|-------------|
+| `NEO4J_URI` | Neo4j connection URI |
+| `NEO4J_USER` | Neo4j username |
+| `NEO4J_PASSWORD` | Neo4j password |
+| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `AUTH_SECRET` | NextAuth.js secret |
+| `AUTH_LINKEDIN_ID` | LinkedIn OAuth client ID (optional) |
+| `AUTH_LINKEDIN_SECRET` | LinkedIn OAuth client secret (optional) |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+smart-career-navigator/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx                    # Main UI with all tabs
+│   │   ├── api/
+│   │   │   ├── roles/                  # GET roles from Neo4j
+│   │   │   ├── career-paths/           # Skill-first pathfinding
+│   │   │   ├── skill-gap/              # Graph-based skill gap analysis
+│   │   │   ├── learning-plan/          # AI curriculum + link validation
+│   │   │   ├── connections/            # Graph-based networking
+│   │   │   ├── community-stories/      # Reddit API integration
+│   │   │   ├── onet-insights/          # O*NET labor market data
+│   │   │   ├── upload-resume/          # Claude PDF parsing
+│   │   │   ├── match-role/             # Skill-based role matching
+│   │   │   └── auth/                   # NextAuth.js OAuth
+│   ├── components/                     # React components
+│   ├── lib/
+│   │   ├── neo4j.ts                    # Neo4j driver
+│   │   ├── anthropic.ts               # Claude API client
+│   │   ├── rocketride.ts              # RocketRide pipeline client
+│   │   ├── rocketride-engine.ts       # Pipeline executor (reads .pipe files)
+│   │   ├── skill-pathfinder.ts        # AI-first career pathfinding
+│   │   ├── role-matcher.ts            # AI role creation for unknown titles
+│   │   ├── link-validator.ts          # URL validation for resources
+│   │   └── auth.ts                    # NextAuth.js configuration
+├── pipelines/
+│   ├── career_path_analyzer.pipe       # RocketRide: career analysis
+│   ├── learning_plan_generator.pipe    # RocketRide: learning plans
+│   ├── connection_recommender.pipe     # RocketRide: networking
+│   └── onet_analyzer.pipe             # RocketRide: O*NET extraction
+├── scripts/
+│   └── seed.ts                        # Neo4j database seeder
+└── docker-compose.yml                 # Neo4j + RocketRide containers
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+MIT
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Built for the Neo4j x RocketRide AI Hackathon 2025
